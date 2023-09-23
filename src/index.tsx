@@ -4,13 +4,24 @@ import ReactDOM from 'react-dom/client';
 import {
   QueryClient,
   QueryClientProvider,
-  useQuery,
 } from '@tanstack/react-query';
 
 import './index.css';
-import App from './App';
+import Main from './Main';
 
 const queryClient = new QueryClient()
+
+interface AppProps {
+  queryClient: QueryClient
+}
+
+const App: React.FC<AppProps> = ({ queryClient }: AppProps) => {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <Main gameId="fe17381295b743c7b54983889544fc8e"/>
+    </QueryClientProvider>
+  )
+}
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement

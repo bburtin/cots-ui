@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import {
   useQuery,
 } from '@tanstack/react-query';
@@ -7,28 +7,29 @@ import axios from 'axios';
 
 import { CssVarsProvider } from '@mui/joy/styles';
 
+import { Game } from './models';
 import { GameResponse, gameFromResponse } from './api';
 import GameForm from './GameForm';
 
-function Main() {
-  const [isRunning, setIsRunning] = useState(false);
+interface Props {
+  gameId: string;
+}
 
+async function getGameById(id: string): Promise<Game> {
+  const url = `/api/v1/games/${id}`;
+  const response = await axios.get<GameResponse>(url);
+  return gameFromResponse(response.data);
+}
+
+const Main: React.FC<Props> = ({ gameId }: Props) => {
   const { isLoading, error, data, isFetching } = useQuery({
-    queryKey: ['gameData'],
-    queryFn: () =>
-      axios
-        .get<GameResponse>('/api/v1/games/fe17381295b743c7b54983889544fc8e')
-        .then((res) => res.data),
+    queryKey: ['games', gameId],
+    queryFn: () => getGameById(gameId)
   });
 
   let errorMessage = '';
   if (error instanceof Error) {
     errorMessage = error.message;
-  }
-
-  let game = null;
-  if (data) {
-    game = gameFromResponse(data);
   }
 
   return (
@@ -38,7 +39,7 @@ function Main() {
       {error != null && <p><b>Error: {errorMessage}</b></p>}
       {isFetching && <p>Fetching...</p>}
 
-      {game && <GameForm game={game} />}
+      {data && <GameForm game={data} />}
       <ReactQueryDevtools initialIsOpen />
     </CssVarsProvider>
   );
