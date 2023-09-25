@@ -18,7 +18,7 @@ interface AppProps {
 const App: React.FC<AppProps> = ({ queryClient }: AppProps) => {
   return (
     <QueryClientProvider client={queryClient}>
-      <Main gameId="fe17381295b743c7b54983889544fc8e"/>
+      <Main gameId="b499bdb254fc4bcd925bb4c288ed80f8"/>
     </QueryClientProvider>
   )
 }
