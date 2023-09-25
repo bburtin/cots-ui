@@ -24,6 +24,42 @@ const horizontalSx = {
   gap: 2
 };
 
+interface UpdateGameBody {
+  name?: string;
+  team1_name?: string;
+  team1_score?: number;
+  team2_name?: string;
+  team2_score?: number;
+};
+
+async function updateGame(
+  id: string,
+  name?: string,
+  team1Name?: string,
+  team1Score?: number,
+  team2Name?: string,
+  team2Score?: number
+) {
+  const url = `/api/v1/games/${id}`;
+  const body: UpdateGameBody = {
+    name: name,
+    team1_name: team1Name,
+    team1_score: team1Score,
+    team2_name: team2Name,
+    team2_score: team2Score
+  };
+  const response = await axios.patch<GameResponse>(url, body);
+  return gameFromResponse(response.data);
+}
+
+interface UpdateGameBody {
+  name?: string;
+  team1_name?: string;
+  team1_score?: number;
+  team2_name?: string;
+  team2_score?: number;
+};
+
 async function getGameById(id: string): Promise<Game> {
   const url = `/api/v1/games/${id}`;
   const response = await axios.get<GameResponse>(url);
