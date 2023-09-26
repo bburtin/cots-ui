@@ -241,6 +241,38 @@ const GameForm: React.FC<Props> = ({ gameId }: Props) => {
     mutation.mutate(getUpdateBody());
   }
 
+  function handleClickDecrementTeam1Score(e: React.MouseEvent<HTMLButtonElement>) {
+    if (game) {
+      const body = new UpdateGameBody();
+      body.team1_score = game.team1Score - 1;
+      mutation.mutate(body);
+    }
+  }
+
+  function handleClickIncrementTeam1Score(e: React.MouseEvent<HTMLButtonElement>) {
+    if (game) {
+      const body = new UpdateGameBody();
+      body.team1_score = game.team1Score + 1;
+      mutation.mutate(body);
+    }
+  }
+
+  function handleClickDecrementTeam2Score(e: React.MouseEvent<HTMLButtonElement>) {
+    if (game) {
+      const body = new UpdateGameBody();
+      body.team2_score = game.team2Score - 1;
+      mutation.mutate(body);
+    }
+  }
+
+  function handleClickIncrementTeam2Score(e: React.MouseEvent<HTMLButtonElement>) {
+    if (game) {
+      const body = new UpdateGameBody();
+      body.team2_score = game.team2Score + 1;
+      mutation.mutate(body);
+    }
+  }
+
   return (
     <CssVarsProvider>
       <Sheet sx={horizontalSx}>
@@ -272,8 +304,8 @@ const GameForm: React.FC<Props> = ({ gameId }: Props) => {
         <FormControl>
           <Input
             name="team1Score"
-            startDecorator={<Button>-</Button>}
-            endDecorator={<Button>+</Button>}
+            startDecorator={<Button onClick={handleClickDecrementTeam1Score}>-</Button>}
+            endDecorator={<Button onClick={handleClickIncrementTeam1Score}>+</Button>}
             value={team1ScoreString}
             onFocus={handleFocusTeam1Score}
             onBlur={handleBlurTeam1Score}
@@ -298,8 +330,8 @@ const GameForm: React.FC<Props> = ({ gameId }: Props) => {
         <FormControl>
           <Input
             name="team2Score"
-            startDecorator={<Button>-</Button>}
-            endDecorator={<Button>+</Button>}
+            startDecorator={<Button onClick={handleClickDecrementTeam2Score}>-</Button>}
+            endDecorator={<Button onClick={handleClickIncrementTeam2Score}>+</Button>}
             value={team2ScoreString}
             onFocus={handleFocusTeam2Score}
             onBlur={handleBlurTeam2Score}
