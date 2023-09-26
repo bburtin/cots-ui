@@ -61,26 +61,41 @@ interface UpdateGameBody {
 };
 
 async function getGameById(id: string): Promise<Game> {
+  console.log('Fetching ' + new Date().toISOString());
+
   const url = `/api/v1/games/${id}`;
   const response = await axios.get<GameResponse>(url);
   return gameFromResponse(response.data);
 }
 
-enum Focused { None, Name, Team1Name, Team1Score, Team2Name, Team2Score };
+enum Field { Name, Team1Name, Team1Score, Team2Name, Team2Score };
+
+function addField(prev: Set<Field>, addedField: Field): Set<Field> {
+  const newSet = new Set(prev);
+  newSet.add(addedField);
+  return newSet;
+}
+
+function removeField(prev: Set<Field>, removedField: Field): Set<Field> {
+  const newSet = new Set(prev);
+  newSet.delete(removedField);
+  return newSet;
+}
 
 const GameForm: React.FC<Props> = ({ gameId }: Props) => {
   const { isLoading, error, data, isFetching } = useQuery({
     queryKey: ['games', gameId],
     queryFn: () => getGameById(gameId),
     staleTime: 5000,
-    refetchInterval: 1000
+    refetchInterval: 5000
   });
-  const [focused, setFocused] = useState<Focused>(Focused.None);
+
   const [updatedName, setUpdatedName] = useState<string>('');
   const [updatedTeam1Name, setUpdatedTeam1Name] = useState<string>('');
   const [updatedTeam1Score, setUpdatedTeam1Score] = useState<string>('');
   const [updatedTeam2Name, setUpdatedTeam2Name] = useState<string>('');
   const [updatedTeam2Score, setUpdatedTeam2Score] = useState<string>('');
+  const [changedFields, setChangedFields] = useState<Set<Field>>(new Set());
 
   let errorMessage = null;
   if (error instanceof Error) {
@@ -94,43 +109,45 @@ const GameForm: React.FC<Props> = ({ gameId }: Props) => {
   let team2ScoreString = '';
 
   if (data) {
-    gameName = updatedName || data.name;
-    team1Name = updatedTeam1Name || data.team1Name;
-    team1ScoreString = updatedTeam1Score || String(data.team1Score);
-    team2Name = updatedTeam2Name || data.team2Name;
-    team2ScoreString = updatedTeam2Score || String(data.team2Score);
+    gameName = changedFields.has(Field.Name) ? updatedName : data.name;
+    team1Name = changedFields.has(Field.Team1Name) ? updatedTeam1Name : data.team1Name;
+    team1ScoreString = changedFields.has(Field.Team1Score) ? updatedTeam1Score : String(data.team1Score);
+    team2Name = changedFields.has(Field.Team2Name) ? updatedTeam2Name : data.team2Name;
+    team2ScoreString = changedFields.has(Field.Team2Score) ? updatedTeam2Score : String(data.team2Score);
   }
 
-  console.log('Rendering, focused=' + focused);
-
-  function handleFocus(newFocused: Focused) {
-    setFocused(newFocused);
-  }
+  console.log('Rendering ' + new Date().toISOString() + ', changedFields=' + Array.from(changedFields));
 
   function handleFocusName(e: React.FocusEvent<HTMLInputElement>) {
     setUpdatedName(e.target.value);
+    setChangedFields(prev => addField(prev, Field.Name));
   }
 
   function handleFocusTeam1Name(e: React.FocusEvent<HTMLInputElement>) {
     setUpdatedTeam1Name(e.target.value);
+    setChangedFields(prev => addField(prev, Field.Team1Name));
   }
 
   function handleFocusTeam1Score(e: React.FocusEvent<HTMLInputElement>) {
     setUpdatedTeam1Score(e.target.value);
+    setChangedFields(prev => addField(prev, Field.Team1Score));
   }
 
   function handleFocusTeam2Name(e: React.FocusEvent<HTMLInputElement>) {
     setUpdatedTeam2Name(e.target.value);
+    setChangedFields(prev => addField(prev, Field.Team2Name));
   }
 
   function handleFocusTeam2Score(e: React.FocusEvent<HTMLInputElement>) {
     setUpdatedTeam2Score(e.target.value);
+    setChangedFields(prev => addField(prev, Field.Team2Score));
   }
 
   function handleBlurName(e: React.FocusEvent<HTMLInputElement>) {
     if (data && e.target.value === data.name) {
       // Value was not changed.
       setUpdatedName('');
+      setChangedFields(prev => removeField(prev, Field.Name));
     }
   }
 
@@ -138,6 +155,7 @@ const GameForm: React.FC<Props> = ({ gameId }: Props) => {
     if (data && e.target.value === data.team1Name) {
       // Value was not changed.
       setUpdatedTeam1Name('');
+      setChangedFields(prev => removeField(prev, Field.Team1Name));
     }
   }
 
@@ -145,6 +163,7 @@ const GameForm: React.FC<Props> = ({ gameId }: Props) => {
     if (data && e.target.value === String(data.team1Score)) {
       // Value was not changed.
       setUpdatedTeam1Score('');
+      setChangedFields(prev => removeField(prev, Field.Team1Score));
     }
   }
 
@@ -152,6 +171,7 @@ const GameForm: React.FC<Props> = ({ gameId }: Props) => {
     if (data && e.target.value === data.team2Name) {
       // Value was not changed.
       setUpdatedTeam2Name('');
+      setChangedFields(prev => removeField(prev, Field.Team2Name));
     }
   }
 
@@ -159,6 +179,7 @@ const GameForm: React.FC<Props> = ({ gameId }: Props) => {
     if (data && e.target.value === String(data.team2Score)) {
       // Value was not changed.
       setUpdatedTeam2Score('');
+      setChangedFields(prev => removeField(prev, Field.Team2Score));
     }
   }
 
@@ -201,7 +222,7 @@ const GameForm: React.FC<Props> = ({ gameId }: Props) => {
             onFocus={handleFocusName}
             onBlur={handleBlurName}
             onChange={handleChangeName}
-            color={updatedName ? 'warning' : 'neutral'}
+            color={changedFields.has(Field.Name) ? 'warning' : 'neutral'}
           />
         </FormControl>
       </Sheet>
@@ -215,7 +236,7 @@ const GameForm: React.FC<Props> = ({ gameId }: Props) => {
             onFocus={handleFocusTeam1Name}
             onBlur={handleBlurTeam1Name}
             onChange={handleChangeTeam1Name}
-            color={updatedTeam1Name ? 'warning' : 'neutral'}
+            color={changedFields.has(Field.Team1Name) ? 'warning' : 'neutral'}
           />
         </FormControl>
         <FormControl>
@@ -227,7 +248,7 @@ const GameForm: React.FC<Props> = ({ gameId }: Props) => {
             onFocus={handleFocusTeam1Score}
             onBlur={handleBlurTeam1Score}
             onChange={handleChangeTeam1Score}
-            color={updatedTeam1Score ? 'warning' : 'neutral'}
+            color={changedFields.has(Field.Team1Score) ? 'warning' : 'neutral'}
           />
         </FormControl>
       </Sheet>
@@ -241,7 +262,7 @@ const GameForm: React.FC<Props> = ({ gameId }: Props) => {
             onFocus={handleFocusTeam2Name}
             onBlur={handleBlurTeam2Name}
             onChange={handleChangeTeam2Name}
-            color={updatedTeam2Name ? 'warning' : 'neutral'}
+            color={changedFields.has(Field.Team2Name) ? 'warning' : 'neutral'}
           />
         </FormControl>
         <FormControl>
@@ -253,7 +274,7 @@ const GameForm: React.FC<Props> = ({ gameId }: Props) => {
             onFocus={handleFocusTeam2Score}
             onBlur={handleBlurTeam2Score}
             onChange={handleChangeTeam2Score}
-            color={updatedTeam2Score ? 'warning' : 'neutral'}
+            color={changedFields.has(Field.Team2Score) ? 'warning' : 'neutral'}
           />
         </FormControl>
       </Sheet>
