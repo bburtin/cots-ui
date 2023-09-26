@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import {
+  useMutation,
   useQuery,
+  useQueryClient
 } from '@tanstack/react-query';
 import axios from 'axios';
 
@@ -24,33 +26,13 @@ const horizontalSx = {
   gap: 2
 };
 
-interface UpdateGameBody {
+class UpdateGameBody {
   name?: string;
   team1_name?: string;
   team1_score?: number;
   team2_name?: string;
   team2_score?: number;
 };
-
-async function updateGame(
-  id: string,
-  name?: string,
-  team1Name?: string,
-  team1Score?: number,
-  team2Name?: string,
-  team2Score?: number
-) {
-  const url = `/api/v1/games/${id}`;
-  const body: UpdateGameBody = {
-    name: name,
-    team1_name: team1Name,
-    team1_score: team1Score,
-    team2_name: team2Name,
-    team2_score: team2Score
-  };
-  const response = await axios.patch<GameResponse>(url, body);
-  return gameFromResponse(response.data);
-}
 
 interface UpdateGameBody {
   name?: string;
@@ -61,10 +43,14 @@ interface UpdateGameBody {
 };
 
 async function getGameById(id: string): Promise<Game> {
-  console.log('Fetching ' + new Date().toISOString());
-
   const url = `/api/v1/games/${id}`;
   const response = await axios.get<GameResponse>(url);
+  return gameFromResponse(response.data);
+}
+
+async function updateGameById(id: string, body: UpdateGameBody): Promise<Game> {
+  const url = `/api/v1/games/${id}`;
+  const response = await axios.patch<GameResponse>(url, body);
   return gameFromResponse(response.data);
 }
 
@@ -83,23 +69,65 @@ function removeField(prev: Set<Field>, removedField: Field): Set<Field> {
 }
 
 const GameForm: React.FC<Props> = ({ gameId }: Props) => {
-  const { isLoading, error, data, isFetching } = useQuery({
-    queryKey: ['games', gameId],
-    queryFn: () => getGameById(gameId),
-    staleTime: 5000,
-    refetchInterval: 5000
-  });
-
   const [updatedName, setUpdatedName] = useState<string>('');
   const [updatedTeam1Name, setUpdatedTeam1Name] = useState<string>('');
   const [updatedTeam1Score, setUpdatedTeam1Score] = useState<string>('');
   const [updatedTeam2Name, setUpdatedTeam2Name] = useState<string>('');
   const [updatedTeam2Score, setUpdatedTeam2Score] = useState<string>('');
   const [changedFields, setChangedFields] = useState<Set<Field>>(new Set());
+  const queryClient = useQueryClient();
+
+  function resetEditedState() {
+    setUpdatedName('');
+    setUpdatedTeam1Name('');
+    setUpdatedTeam1Score('');
+    setUpdatedTeam2Name('');
+    setUpdatedTeam2Score('');
+    setChangedFields(new Set<Field>());
+  }
+
+  const query = useQuery({
+    queryKey: ['games', gameId],
+    queryFn: () => getGameById(gameId),
+    staleTime: 5000,
+    refetchInterval: 5000
+  });
+
+  const mutation = useMutation(
+    (body: UpdateGameBody) => updateGameById(gameId, body),
+    {
+      onSuccess: (data, variables, context) => {
+        const key = ['games', data.id];
+        queryClient.invalidateQueries(key);
+        queryClient.setQueryData(key, data);
+        resetEditedState();
+      }
+    }
+  );
+
+  function getUpdateBody(): UpdateGameBody {
+    const body = new UpdateGameBody();
+    if (changedFields.has(Field.Name)) {
+      body.name = updatedName;
+    }
+    if (changedFields.has(Field.Team1Name)) {
+      body.team1_name = updatedTeam1Name;
+    }
+    if (changedFields.has(Field.Team1Score)) {
+      body.team1_score = parseInt(updatedTeam1Score);
+    }
+    if (changedFields.has(Field.Team2Name)) {
+      body.team2_name = updatedTeam2Name;
+    }
+    if (changedFields.has(Field.Team2Score)) {
+      body.team2_score = parseInt(updatedTeam2Score);
+    }
+    return body;
+  }
 
   let errorMessage = null;
-  if (error instanceof Error) {
-    errorMessage = error.message;
+  if (query.error instanceof Error) {
+    errorMessage = query.error.message;
   }
 
   let gameName = '';
@@ -107,16 +135,15 @@ const GameForm: React.FC<Props> = ({ gameId }: Props) => {
   let team1ScoreString = '';
   let team2Name = '';
   let team2ScoreString = '';
+  const game: Game | null = query.data || null;
 
-  if (data) {
-    gameName = changedFields.has(Field.Name) ? updatedName : data.name;
-    team1Name = changedFields.has(Field.Team1Name) ? updatedTeam1Name : data.team1Name;
-    team1ScoreString = changedFields.has(Field.Team1Score) ? updatedTeam1Score : String(data.team1Score);
-    team2Name = changedFields.has(Field.Team2Name) ? updatedTeam2Name : data.team2Name;
-    team2ScoreString = changedFields.has(Field.Team2Score) ? updatedTeam2Score : String(data.team2Score);
+  if (game) {
+    gameName = changedFields.has(Field.Name) ? updatedName : game.name;
+    team1Name = changedFields.has(Field.Team1Name) ? updatedTeam1Name : game.team1Name;
+    team1ScoreString = changedFields.has(Field.Team1Score) ? updatedTeam1Score : String(game.team1Score);
+    team2Name = changedFields.has(Field.Team2Name) ? updatedTeam2Name : game.team2Name;
+    team2ScoreString = changedFields.has(Field.Team2Score) ? updatedTeam2Score : String(game.team2Score);
   }
-
-  console.log('Rendering ' + new Date().toISOString() + ', changedFields=' + Array.from(changedFields));
 
   function handleFocusName(e: React.FocusEvent<HTMLInputElement>) {
     setUpdatedName(e.target.value);
@@ -144,7 +171,7 @@ const GameForm: React.FC<Props> = ({ gameId }: Props) => {
   }
 
   function handleBlurName(e: React.FocusEvent<HTMLInputElement>) {
-    if (data && e.target.value === data.name) {
+    if (game && e.target.value === game.name) {
       // Value was not changed.
       setUpdatedName('');
       setChangedFields(prev => removeField(prev, Field.Name));
@@ -152,7 +179,7 @@ const GameForm: React.FC<Props> = ({ gameId }: Props) => {
   }
 
   function handleBlurTeam1Name(e: React.FocusEvent<HTMLInputElement>) {
-    if (data && e.target.value === data.team1Name) {
+    if (game && e.target.value === game.team1Name) {
       // Value was not changed.
       setUpdatedTeam1Name('');
       setChangedFields(prev => removeField(prev, Field.Team1Name));
@@ -160,7 +187,7 @@ const GameForm: React.FC<Props> = ({ gameId }: Props) => {
   }
 
   function handleBlurTeam1Score(e: React.FocusEvent<HTMLInputElement>) {
-    if (data && e.target.value === String(data.team1Score)) {
+    if (game && e.target.value === String(game.team1Score)) {
       // Value was not changed.
       setUpdatedTeam1Score('');
       setChangedFields(prev => removeField(prev, Field.Team1Score));
@@ -168,7 +195,7 @@ const GameForm: React.FC<Props> = ({ gameId }: Props) => {
   }
 
   function handleBlurTeam2Name(e: React.FocusEvent<HTMLInputElement>) {
-    if (data && e.target.value === data.team2Name) {
+    if (game && e.target.value === game.team2Name) {
       // Value was not changed.
       setUpdatedTeam2Name('');
       setChangedFields(prev => removeField(prev, Field.Team2Name));
@@ -176,7 +203,7 @@ const GameForm: React.FC<Props> = ({ gameId }: Props) => {
   }
 
   function handleBlurTeam2Score(e: React.FocusEvent<HTMLInputElement>) {
-    if (data && e.target.value === String(data.team2Score)) {
+    if (game && e.target.value === String(game.team2Score)) {
       // Value was not changed.
       setUpdatedTeam2Score('');
       setChangedFields(prev => removeField(prev, Field.Team2Score));
@@ -204,11 +231,14 @@ const GameForm: React.FC<Props> = ({ gameId }: Props) => {
   }
 
   function handleClickUndo(e: React.MouseEvent<HTMLButtonElement>) {
-    setUpdatedName('');
-    setUpdatedTeam1Name('');
-    setUpdatedTeam1Score('');
-    setUpdatedTeam2Name('');
-    setUpdatedTeam2Score('');
+    resetEditedState();
+  }
+
+  function handleClickSave(e: React.MouseEvent<HTMLButtonElement>) {
+    if (changedFields.size === 0) {
+      return;
+    }
+    mutation.mutate(getUpdateBody());
   }
 
   return (
@@ -280,8 +310,16 @@ const GameForm: React.FC<Props> = ({ gameId }: Props) => {
       </Sheet>
 
       <Sheet sx={horizontalSx}>
-        <Button>Save</Button>
-        <Button onClick={handleClickUndo}>Undo</Button>
+        <Button
+          disabled={changedFields.size === 0}
+          onClick={handleClickSave}>
+            Save
+        </Button>
+        <Button
+          disabled={changedFields.size === 0}
+          onClick={handleClickUndo}>
+            Undo
+        </Button>
         <Sheet>
           <b>Game ID:</b>
           <Button>BRCV</Button>
