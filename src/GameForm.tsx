@@ -107,6 +107,61 @@ const GameForm: React.FC<Props> = ({ gameId }: Props) => {
     setFocused(newFocused);
   }
 
+  function handleFocusName(e: React.FocusEvent<HTMLInputElement>) {
+    setUpdatedName(e.target.value);
+  }
+
+  function handleFocusTeam1Name(e: React.FocusEvent<HTMLInputElement>) {
+    setUpdatedTeam1Name(e.target.value);
+  }
+
+  function handleFocusTeam1Score(e: React.FocusEvent<HTMLInputElement>) {
+    setUpdatedTeam1Score(e.target.value);
+  }
+
+  function handleFocusTeam2Name(e: React.FocusEvent<HTMLInputElement>) {
+    setUpdatedTeam2Name(e.target.value);
+  }
+
+  function handleFocusTeam2Score(e: React.FocusEvent<HTMLInputElement>) {
+    setUpdatedTeam2Score(e.target.value);
+  }
+
+  function handleBlurName(e: React.FocusEvent<HTMLInputElement>) {
+    if (data && e.target.value === data.name) {
+      // Value was not changed.
+      setUpdatedName('');
+    }
+  }
+
+  function handleBlurTeam1Name(e: React.FocusEvent<HTMLInputElement>) {
+    if (data && e.target.value === data.team1Name) {
+      // Value was not changed.
+      setUpdatedTeam1Name('');
+    }
+  }
+
+  function handleBlurTeam1Score(e: React.FocusEvent<HTMLInputElement>) {
+    if (data && e.target.value === String(data.team1Score)) {
+      // Value was not changed.
+      setUpdatedTeam1Score('');
+    }
+  }
+
+  function handleBlurTeam2Name(e: React.FocusEvent<HTMLInputElement>) {
+    if (data && e.target.value === data.team2Name) {
+      // Value was not changed.
+      setUpdatedTeam2Name('');
+    }
+  }
+
+  function handleBlurTeam2Score(e: React.FocusEvent<HTMLInputElement>) {
+    if (data && e.target.value === String(data.team2Score)) {
+      // Value was not changed.
+      setUpdatedTeam2Score('');
+    }
+  }
+
   function handleChangeName(e: React.ChangeEvent<HTMLInputElement>) {
     setUpdatedName(e.target.value);
   }
@@ -143,8 +198,8 @@ const GameForm: React.FC<Props> = ({ gameId }: Props) => {
           <Input
             name="gameName"
             value={gameName}
-            onFocus={() => handleFocus(Focused.Name)}
-            onBlur={() => handleFocus(Focused.None)}
+            onFocus={handleFocusName}
+            onBlur={handleBlurName}
             onChange={handleChangeName}
             color={updatedName ? 'warning' : 'neutral'}
           />
@@ -157,8 +212,8 @@ const GameForm: React.FC<Props> = ({ gameId }: Props) => {
           <Input
             name="team1Name"
             value={team1Name}
-            onFocus={() => handleFocus(Focused.Team1Name)}
-            onBlur={() => handleFocus(Focused.None)}
+            onFocus={handleFocusTeam1Name}
+            onBlur={handleBlurTeam1Name}
             onChange={handleChangeTeam1Name}
             color={updatedTeam1Name ? 'warning' : 'neutral'}
           />
@@ -169,8 +224,8 @@ const GameForm: React.FC<Props> = ({ gameId }: Props) => {
             startDecorator={<Button>-</Button>}
             endDecorator={<Button>+</Button>}
             value={team1ScoreString}
-            onFocus={() => handleFocus(Focused.Team1Score)}
-            onBlur={() => handleFocus(Focused.None)}
+            onFocus={handleFocusTeam1Score}
+            onBlur={handleBlurTeam1Score}
             onChange={handleChangeTeam1Score}
             color={updatedTeam1Score ? 'warning' : 'neutral'}
           />
@@ -183,8 +238,8 @@ const GameForm: React.FC<Props> = ({ gameId }: Props) => {
           <Input
             name="team2Name"
             value={team2Name}
-            onFocus={() => handleFocus(Focused.Team2Name)}
-            onBlur={() => handleFocus(Focused.None)}
+            onFocus={handleFocusTeam2Name}
+            onBlur={handleBlurTeam2Name}
             onChange={handleChangeTeam2Name}
             color={updatedTeam2Name ? 'warning' : 'neutral'}
           />
@@ -195,8 +250,8 @@ const GameForm: React.FC<Props> = ({ gameId }: Props) => {
             startDecorator={<Button>-</Button>}
             endDecorator={<Button>+</Button>}
             value={team2ScoreString}
-            onFocus={() => handleFocus(Focused.Team2Score)}
-            onBlur={() => handleFocus(Focused.None)}
+            onFocus={handleFocusTeam2Score}
+            onBlur={handleBlurTeam2Score}
             onChange={handleChangeTeam2Score}
             color={updatedTeam2Score ? 'warning' : 'neutral'}
           />
