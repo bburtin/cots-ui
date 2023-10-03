@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import {
   useMutation,
   useQuery,
@@ -352,11 +353,12 @@ const GameForm: React.FC<Props> = ({ gameId }: Props) => {
           onClick={handleClickUndo}>
             Undo
         </Button>
-        <Sheet>
-          <b>Game ID:</b>
-          <Button>BRCV</Button>
-          <b>Admin ID:</b><Button>WXTL</Button>
-        </Sheet>
+        {game && (
+          <Sheet>
+            <b>Admin ID:</b> <Link to={`/admin/${game.adminId}`}>{game.adminId}</Link><br/>
+            <b>View ID:</b> <Link to={`/view/${game.viewId}`}>{game.viewId}</Link>
+          </Sheet>
+        )}
       </Sheet>
     </CssVarsProvider>
   )

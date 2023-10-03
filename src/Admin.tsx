@@ -25,6 +25,7 @@ async function getGameByAdminId(adminId: string | undefined): Promise<Game> {
 function Admin() {
   const { adminId } = useParams();
   const query = useQuery({
+    queryKey: ['games', 'adminId', adminId],
     queryFn: () => getGameByAdminId(adminId)
   });
   const queryClient = useQueryClient();

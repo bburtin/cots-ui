@@ -10,6 +10,7 @@ import {
 import './index.css';
 import Admin from './Admin';
 import Main from './Main';
+import ViewGame from './ViewGame';
 
 const queryClient = new QueryClient()
 
@@ -24,6 +25,7 @@ const App: React.FC<AppProps> = ({ queryClient }: AppProps) => {
         <Routes>
           <Route path="/" element={<Main />} />
           <Route path="/admin/:adminId" element={<Admin />} />
+          <Route path="/view/:viewId" element={<ViewGame />} />
         </Routes>
       </BrowserRouter>
     </QueryClientProvider>
