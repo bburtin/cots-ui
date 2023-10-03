@@ -1,5 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
 
 import {
   QueryClient,
@@ -7,6 +8,7 @@ import {
 } from '@tanstack/react-query';
 
 import './index.css';
+import Admin from './Admin';
 import Main from './Main';
 
 const queryClient = new QueryClient()
@@ -18,7 +20,12 @@ interface AppProps {
 const App: React.FC<AppProps> = ({ queryClient }: AppProps) => {
   return (
     <QueryClientProvider client={queryClient}>
-      <Main gameId="b499bdb254fc4bcd925bb4c288ed80f8"/>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Main />} />
+          <Route path="/admin/:adminId" element={<Admin />} />
+        </Routes>
+      </BrowserRouter>
     </QueryClientProvider>
   )
 }
