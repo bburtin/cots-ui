@@ -5,9 +5,10 @@ enum DbStatus {
 
 class Game {
   createdTime: Date;
+  modifiedTime: Date;
   dbStatus: DbStatus;
   id: string;
-  name: string;
+  name: string | null;
   team1Name: string;
   team1Score: number;
   team2Name: string;
@@ -17,9 +18,10 @@ class Game {
 
   constructor(
     createdTime: Date,
+    modifiedTime: Date,
     dbStatus: DbStatus,
     id: string,
-    name: string,
+    name: string | null,
     team1Name: string,
     team1Score: number,
     team2Name: string,
@@ -28,6 +30,7 @@ class Game {
     viewId: string
   ) {
     this.createdTime = createdTime;
+    this.modifiedTime = modifiedTime;
     this.dbStatus = dbStatus;
     this.id = id;
     this.name = name;
@@ -42,8 +45,9 @@ class Game {
 
 class ViewGame {
   createdTime: Date;
+  modifiedTime: Date;
   dbStatus: DbStatus;
-  name: string;
+  name: string | null;
   team1Name: string;
   team1Score: number;
   team2Name: string;
@@ -52,8 +56,9 @@ class ViewGame {
 
   constructor(
     createdTime: Date,
+    modifiedTime: Date,
     dbStatus: DbStatus,
-    name: string,
+    name: string | null,
     team1Name: string,
     team1Score: number,
     team2Name: string,
@@ -61,6 +66,7 @@ class ViewGame {
     viewId: string
   ) {
     this.createdTime = createdTime;
+    this.modifiedTime = modifiedTime;
     this.dbStatus = dbStatus;
     this.name = name;
     this.team1Name = team1Name;

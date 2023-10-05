@@ -139,7 +139,12 @@ const GameForm: React.FC<Props> = ({ gameId }: Props) => {
   const game: Game | null = query.data || null;
 
   if (game) {
-    gameName = changedFields.has(Field.Name) ? updatedName : game.name;
+    if (changedFields.has(Field.Name)) {
+      gameName = updatedName;
+    } else if (game.name) {
+      gameName = game.name;
+    }
+
     team1Name = changedFields.has(Field.Team1Name) ? updatedTeam1Name : game.team1Name;
     team1ScoreString = changedFields.has(Field.Team1Score) ? updatedTeam1Score : String(game.team1Score);
     team2Name = changedFields.has(Field.Team2Name) ? updatedTeam2Name : game.team2Name;
