@@ -54,41 +54,31 @@ function createViewGameResponse(): ViewGameResponse {
 }
 
 test('calculates refetch interval with null Games', () => {
-  let interval = getRefetchInterval(null, null);
-  expect(interval).toEqual(1000);
+  let interval = getRefetchInterval(2000, 1000, 10000, null, null);
+  expect(interval).toEqual(2000);
 
-  interval = getRefetchInterval(createGame(), null);
-  expect(interval).toEqual(1000);
+  interval = getRefetchInterval(2000, 1000, 10000, createGame(), null);
+  expect(interval).toEqual(2000);
 
-  interval = getRefetchInterval(null, createGame());
-  expect(interval).toEqual(1000);
+  interval = getRefetchInterval(2000, 1000, 10000, null, createGame());
+  expect(interval).toEqual(2000);
 });
 
-test('calculates refetch interval in range', () => {
+test('calculates refetch interval object changed', () => {
   const game1 = createGame();
   const game2 = createGame();
   game2.modifiedTime = new Date(game1.modifiedTime.getTime() + 3000);
 
-  const interval = getRefetchInterval(game1, game2);
-  expect(interval).toEqual(3000);
-});
-
-test('calculates refetch interval short', () => {
-  const game1 = createGame();
-  const game2 = createGame();
-  game2.modifiedTime = new Date(game1.modifiedTime.getTime() + 500);
-
-  const interval = getRefetchInterval(game1, game2);
+  const interval = getRefetchInterval(3000, 1000, 10000, game1, game2);
   expect(interval).toEqual(1000);
 });
 
-test('calculates refetch interval long', () => {
+test("calculates refetch interval when object hasn't changed", () => {
   const game1 = createGame();
   const game2 = createGame();
-  game2.modifiedTime = new Date(game1.modifiedTime.getTime() + 11000);
-
-  const interval = getRefetchInterval(game1, game2);
-  expect(interval).toEqual(10000);
+  game2.modifiedTime = new Date(game1.modifiedTime);
+  const interval = getRefetchInterval(2000, 1000, 10000, game1, game2);
+  expect(interval).toEqual(4000);
 });
 
 test('converts an API response to a Game object', () => {

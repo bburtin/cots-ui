@@ -60,27 +60,41 @@ function viewGameFromResponse(response: ViewGameResponse): ViewGame {
  * Calculates the number of milliseconds to wait until the next refetch from
  * the API.
  *
+ * @param currentInterval the current fetch interval
+ * @param minInterval minimum new interval
+ * @param maxInterval maximum new interval
  * @param previousGame
  * @param game
- * @returns an integer between 1000-10000, depending on how frequently API
+ * @returns an integer between minInterval and maxInterval, depending on how frequently API
  * data is changing.
  */
 function getRefetchInterval(
+  currentInterval: number,
+  minInterval: number,
+  maxInterval: number,
   previousGame: Game | null,
-  game: Game | null
+  game: Game | null,
 ) {
   if (!previousGame || !game) {
-    return 1000;
+    return currentInterval;
   }
-  const millis = game.modifiedTime.getTime() - previousGame.modifiedTime.getTime();
 
-  if (millis < 1000) {
-    return 1000;
+  let newInterval: number;
+  if (game.modifiedTime.getTime() === previousGame.modifiedTime.getTime()) {
+    // No change.
+    newInterval = currentInterval * 2;
+  } else {
+    // Data was updated.
+    newInterval = minInterval;
   }
-  if (millis > 10000) {
-    return 10000;
+
+  if (newInterval < minInterval) {
+    return minInterval;
   }
-  return millis;
+  if (newInterval > maxInterval) {
+    return maxInterval;
+  }
+  return newInterval;
 }
 
 export {

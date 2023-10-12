@@ -15,7 +15,7 @@ import Input from '@mui/joy/Input';
 import Button from '@mui/joy/Button';
 
 import { Game } from './models';
-import { GameResponse, gameFromResponse } from './api';
+import { GameResponse, gameFromResponse, getRefetchInterval } from './api';
 
 
 interface Props {
@@ -76,7 +76,12 @@ const GameForm: React.FC<Props> = ({ gameId }: Props) => {
   const [updatedTeam2Name, setUpdatedTeam2Name] = useState<string>('');
   const [updatedTeam2Score, setUpdatedTeam2Score] = useState<string>('');
   const [changedFields, setChangedFields] = useState<Set<Field>>(new Set());
+  const [previousGame, setPreviousGame] = useState<Game | null>(null);
+  const [refetchInterval, setRefetchInterval] = useState(1000);
   const queryClient = useQueryClient();
+
+  const state = queryClient.getQueryState(['games', gameId]);
+  const dataUpdatedAt = state ? new Date(state.dataUpdatedAt) : null;
 
   function resetEditedState() {
     setUpdatedName('');
@@ -87,21 +92,44 @@ const GameForm: React.FC<Props> = ({ gameId }: Props) => {
     setChangedFields(new Set<Field>());
   }
 
+  /**
+   * If API data has changed, remember the latest version.  This allows
+   * us to set the refetch interval.
+   * @param game the latest Game object from the API
+   */
+  function updatePreviousGame(game: Game) {
+      if (!previousGame || game.modifiedTime.getTime() !== previousGame.modifiedTime.getTime()) {
+        setPreviousGame(game);
+      }
+  }
+
+  async function fetchGame(): Promise<Game> {
+    const game = await getGameById(gameId);
+    updatePreviousGame(game);
+    const newInterval = getRefetchInterval(refetchInterval, 1000, 16000, previousGame, game);
+    setRefetchInterval(newInterval);
+    // console.log(`Fetched game ${game.id}, refetchInterval=${newInterval}`);
+    return game;
+  }
+
   const query = useQuery({
     queryKey: ['games', gameId],
-    queryFn: () => getGameById(gameId),
-    staleTime: 5000,
-    refetchInterval: 5000
+    queryFn: fetchGame,
+    staleTime: refetchInterval,
+    refetchInterval: refetchInterval
   });
 
   const mutation = useMutation(
     (body: UpdateGameBody) => updateGameById(gameId, body),
     {
-      onSuccess: (data, variables, context) => {
-        const key = ['games', data.id];
+      onSuccess: (game, variables, context) => {
+        const key = ['games', game.id];
         queryClient.invalidateQueries(key);
-        queryClient.setQueryData(key, data);
+        queryClient.setQueryData(key, game);
         resetEditedState();
+        updatePreviousGame(game);
+        // console.log('Mutated, setting refetchInterval to 1000');
+        setRefetchInterval(1000);
       }
     }
   );
@@ -136,7 +164,7 @@ const GameForm: React.FC<Props> = ({ gameId }: Props) => {
   let team1ScoreString = '';
   let team2Name = '';
   let team2ScoreString = '';
-  const game: Game | null = query.data || null;
+  const game: Game | undefined = query.data;
 
   if (game) {
     if (changedFields.has(Field.Name)) {
@@ -365,6 +393,7 @@ const GameForm: React.FC<Props> = ({ gameId }: Props) => {
           </Sheet>
         )}
       </Sheet>
+      {dataUpdatedAt && <p>Data updated at {dataUpdatedAt.toLocaleTimeString()}.</p>}
     </CssVarsProvider>
   )
 }
