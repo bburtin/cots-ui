@@ -1,9 +1,9 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import { CssVarsProvider } from '@mui/joy/styles';
 import Sheet from '@mui/joy/Sheet';
 import FormControl from '@mui/joy/FormControl';
-import FormLabel from '@mui/joy/FormLabel';
 import Input from '@mui/joy/Input';
 import Button from '@mui/joy/Button';
 
@@ -15,46 +15,59 @@ const horizontalSx = {
 function Main() {
   const [viewId, setViewId] = useState('');
   const [adminId, setAdminId] = useState('');
+  const navigate = useNavigate();
 
   function handleChangeViewId(e: React.ChangeEvent<HTMLInputElement>) {
-    setViewId(e.target.value);
+    const upper = (e.target.value || '').toUpperCase();
+    setViewId(upper.slice(0, 4));
   }
 
   function handleChangeAdminId(e: React.ChangeEvent<HTMLInputElement>) {
-    setAdminId(e.target.value);
+    const upper = (e.target.value || '').toUpperCase();
+    setAdminId(upper.slice(0, 4));
   }
 
-  function handleClickViewGame(e: React.MouseEvent<HTMLButtonElement>) {
-    console.log(`Viewing game ${viewId}`);
+  function handleSubmitViewGame(e: React.FormEvent<HTMLFormElement>) {
+    navigate(`/view/${viewId}`);
   }
 
-  function handleClickAdminGame(e: React.MouseEvent<HTMLButtonElement>) {
-    console.log(`Administering game ${adminId}`);
+  function handleSubmitAdminGame(e: React.FormEvent<HTMLFormElement>) {
+    navigate(`/admin/${adminId}`);
   }
 
   return (
     <CssVarsProvider>
       <h1>Check Out the Score!</h1>
       <Sheet sx={horizontalSx}>
-        <FormControl orientation="horizontal">
-          <FormLabel>View game</FormLabel>
-          <Input
-            name="viewId"
-            onChange={handleChangeViewId}
-            endDecorator={<Button onClick={handleClickViewGame}>+</Button>}
-          />
-        </FormControl>
+        <form onSubmit={handleSubmitViewGame}>
+          <FormControl orientation="horizontal">
+            <Input
+              name="viewId"
+              placeholder="TPWR"
+              value={viewId}
+              onChange={handleChangeViewId}
+              endDecorator={
+                <Button type="submit">View</Button>
+              }
+            />
+          </FormControl>
+        </form>
       </Sheet>
 
       <Sheet sx={horizontalSx}>
-        <FormControl orientation="horizontal">
-          <FormLabel>Administer game</FormLabel>
-          <Input
-            name="adminId"
-            onChange={handleChangeAdminId}
-            endDecorator={<Button onClick={handleClickAdminGame}>+</Button>}
-          />
-        </FormControl>
+        <form onSubmit={handleSubmitAdminGame}>
+          <FormControl orientation="horizontal">
+            <Input
+              name="adminId"
+              placeholder="NCTD"
+              value={adminId}
+              onChange={handleChangeAdminId}
+              endDecorator={
+                <Button type="submit">Administer</Button>
+              }
+            />
+          </FormControl>
+        </form>
       </Sheet>
     </CssVarsProvider>
   );
