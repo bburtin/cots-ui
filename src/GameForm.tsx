@@ -116,7 +116,8 @@ const GameForm: React.FC<Props> = ({ gameId }: Props) => {
     queryKey: ['games', gameId],
     queryFn: fetchGame,
     staleTime: refetchInterval,
-    refetchInterval: refetchInterval
+    refetchInterval: refetchInterval,
+    useErrorBoundary: true
   });
 
   const mutation = useMutation(
@@ -128,9 +129,10 @@ const GameForm: React.FC<Props> = ({ gameId }: Props) => {
         queryClient.setQueryData(key, game);
         resetEditedState();
         updatePreviousGame(game);
-        // console.log('Mutated, setting refetchInterval to 1000');
+        console.log('Mutated, setting refetchInterval to 1000');
         setRefetchInterval(1000);
-      }
+      },
+      useErrorBoundary: true
     }
   );
 
