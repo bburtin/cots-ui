@@ -35,14 +35,6 @@ class UpdateGameBody {
   team2_score?: number;
 };
 
-interface UpdateGameBody {
-  name?: string;
-  team1_name?: string;
-  team1_score?: number;
-  team2_name?: string;
-  team2_score?: number;
-};
-
 async function getGameById(id: string): Promise<Game> {
   const url = `/api/v1/games/${id}`;
   const response = await axios.get<GameResponse>(url);
