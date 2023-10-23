@@ -13,10 +13,11 @@ import FormControl from '@mui/joy/FormControl';
 import FormLabel from '@mui/joy/FormLabel';
 import Input from '@mui/joy/Input';
 import Button from '@mui/joy/Button';
-
+import IconButton from '@mui/joy/IconButton';
+import ContentCopy from '@mui/icons-material/ContentCopy';
 import { Game } from './models';
 import { GameResponse, gameFromResponse, getRefetchInterval } from './api';
-
+import CopiedToClipboardAlert from './CopiedToClipboardAlert';
 
 interface Props {
   gameId: string;
@@ -69,11 +70,14 @@ const GameForm: React.FC<Props> = ({ gameId }: Props) => {
   const [updatedTeam2Score, setUpdatedTeam2Score] = useState<string>('');
   const [changedFields, setChangedFields] = useState<Set<Field>>(new Set());
   const [previousGame, setPreviousGame] = useState<Game | null>(null);
+  const [showViewClipboardAlert, setShowViewClipboardAlert] = useState(false);
+  const [showAdminClipboardAlert, setShowAdminClipboardAlert] = useState(false);
   const [refetchInterval, setRefetchInterval] = useState(1000);
   const queryClient = useQueryClient();
 
   const state = queryClient.getQueryState(['games', gameId]);
   const dataUpdatedAt = state ? new Date(state.dataUpdatedAt) : null;
+  const baseUrl = `${window.location.protocol}//${window.location.host}`;
 
   function resetEditedState() {
     setUpdatedName('');
@@ -146,11 +150,6 @@ const GameForm: React.FC<Props> = ({ gameId }: Props) => {
       body.team2_score = parseInt(updatedTeam2Score);
     }
     return body;
-  }
-
-  let errorMessage = null;
-  if (query.error instanceof Error) {
-    errorMessage = query.error.message;
   }
 
   let gameName = '';
@@ -301,6 +300,36 @@ const GameForm: React.FC<Props> = ({ gameId }: Props) => {
     }
   }
 
+  function handleClickCopyViewLinkToClipboard(e: React.MouseEvent<HTMLButtonElement>) {
+    if (game) {
+      navigator.clipboard.writeText(`${baseUrl}/view/${game.viewId}`);
+      setShowViewClipboardAlert(true);
+
+      // Turn off admin alert if it's currently being shown, since clipboard
+      // contents have been replaced.
+      setShowAdminClipboardAlert(false);
+    }
+  }
+
+  function handleClickCopyAdminLinkToClipboard(e: React.MouseEvent<HTMLButtonElement>) {
+    if (game) {
+      navigator.clipboard.writeText(`${baseUrl}/admin/${game.adminId}`);
+      setShowAdminClipboardAlert(true);
+
+      // Turn off view alert if it's currently being shown, since clipboard
+      // contents have been replaced.
+      setShowViewClipboardAlert(false);
+    }
+  }
+
+  function closeViewClipboardAlertHandler(e: React.MouseEvent<HTMLElement>) {
+    setShowViewClipboardAlert(false);
+  }
+
+  function closeAdminClipboardAlertHandler(e: React.MouseEvent<HTMLElement>) {
+    setShowAdminClipboardAlert(false);
+  }
+
   return (
     <CssVarsProvider>
       <Sheet sx={horizontalSx}>
@@ -382,12 +411,34 @@ const GameForm: React.FC<Props> = ({ gameId }: Props) => {
         </Button>
         {game && (
           <Sheet>
-            <b>Admin ID:</b> <Link to={`/admin/${game.adminId}`}>{game.adminId}</Link><br/>
-            <b>View ID:</b> <Link to={`/view/${game.viewId}`}>{game.viewId}</Link>
+            <b>View ID:</b>
+            <Link to={`/view/${game.viewId}`}>{game.viewId}</Link>
+            <IconButton onClick={handleClickCopyViewLinkToClipboard}>
+              <ContentCopy />
+            </IconButton>
+            <br/>
+
+            <b>Admin ID:</b>
+            <Link to={`/admin/${game.adminId}`}>{game.adminId}</Link>
+            <IconButton onClick={handleClickCopyAdminLinkToClipboard}>
+              <ContentCopy />
+            </IconButton>
           </Sheet>
         )}
       </Sheet>
       {dataUpdatedAt && <p>Data updated at {dataUpdatedAt.toLocaleTimeString()}.</p>}
+      {showViewClipboardAlert &&
+        <CopiedToClipboardAlert
+          targetName="view link"
+          closeCallback={closeViewClipboardAlertHandler}
+        />
+      }
+      {showAdminClipboardAlert &&
+        <CopiedToClipboardAlert
+          targetName="admin link"
+          closeCallback={closeAdminClipboardAlertHandler}
+        />
+      }
     </CssVarsProvider>
   )
 }
