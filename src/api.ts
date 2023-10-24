@@ -1,4 +1,3 @@
-import axios from 'axios';
 import { DbStatus, Game, ViewGame } from './models';
 
 type GameResponse = {
@@ -98,21 +97,6 @@ function getRefetchInterval(
   return newInterval;
 }
 
-function handleAxiosError(error: unknown): [number | null, string] {
-  let status = null;
-  let errorMessage = '';
-
-  if (axios.isAxiosError(error) && error.response) {
-    status = error.response.status;
-    const statusCategory = Math.floor(status / 100);
-    if (statusCategory === 4) {
-      errorMessage = error.response.data['detail'];
-    }
-  }
-
-  return [status, errorMessage];
-}
-
 class HttpError {
   statusCode: number;
   errorMessage: string;
@@ -129,6 +113,5 @@ export {
   type ViewGameResponse,
   gameFromResponse,
   getRefetchInterval,
-  handleAxiosError,
   viewGameFromResponse
 }

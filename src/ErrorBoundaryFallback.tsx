@@ -1,5 +1,20 @@
+import axios from 'axios';
 import { FallbackProps } from 'react-error-boundary';
-import { handleAxiosError } from './api';
+
+function handleAxiosError(error: unknown): [number | null, string] {
+  let status = null;
+  let errorMessage = '';
+
+  if (axios.isAxiosError(error) && error.response) {
+    status = error.response.status;
+    const statusCategory = Math.floor(status / 100);
+    if (statusCategory === 4) {
+      errorMessage = error.response.data['detail'];
+    }
+  }
+
+  return [status, errorMessage];
+}
 
 function ErrorBoundaryFallback(props: FallbackProps) {
   const [statusCode, errorMessage] = handleAxiosError(props.error);
