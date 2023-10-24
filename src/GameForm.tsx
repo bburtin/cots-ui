@@ -102,7 +102,13 @@ const GameForm: React.FC<Props> = ({ gameId }: Props) => {
   async function fetchGame(): Promise<Game> {
     const game = await getGameById(gameId);
     updatePreviousGame(game);
-    const newInterval = getRefetchInterval(refetchInterval, 1000, 16000, previousGame, game);
+    const newInterval = getRefetchInterval(
+      refetchInterval,
+      1000,
+      16000,
+      previousGame?.modifiedTime,
+      game?.modifiedTime
+    );
     setRefetchInterval(newInterval);
     // console.log(`Fetched game ${game.id}, refetchInterval=${newInterval}`);
     return game;

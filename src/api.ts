@@ -63,8 +63,8 @@ function viewGameFromResponse(response: ViewGameResponse): ViewGame {
  * @param currentInterval the current fetch interval
  * @param minInterval minimum new interval
  * @param maxInterval maximum new interval
- * @param previousGame
- * @param game
+ * @param previousModifiedTime
+ * @param modifiedTime
  * @returns an integer between minInterval and maxInterval, depending on how frequently API
  * data is changing.
  */
@@ -72,15 +72,15 @@ function getRefetchInterval(
   currentInterval: number,
   minInterval: number,
   maxInterval: number,
-  previousGame: Game | null,
-  game: Game | null,
+  previousModifiedTime: Date | undefined,
+  modifiedTime: Date | undefined
 ) {
-  if (!previousGame || !game) {
+  if (!previousModifiedTime || !modifiedTime) {
     return currentInterval;
   }
 
   let newInterval: number;
-  if (game.modifiedTime.getTime() === previousGame.modifiedTime.getTime()) {
+  if (modifiedTime.getTime() === previousModifiedTime.getTime()) {
     // No change.
     newInterval = currentInterval * 2;
   } else {

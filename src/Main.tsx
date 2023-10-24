@@ -11,7 +11,7 @@ import Input from '@mui/joy/Input';
 import Button from '@mui/joy/Button';
 
 import { Game } from './models';
-import { GameResponse, gameFromResponse, getRefetchInterval } from './api';
+import { GameResponse, gameFromResponse } from './api';
 
 const horizontalSx = {
   display: 'flex',

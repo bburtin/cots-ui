@@ -1,4 +1,3 @@
-import { Game, DbStatus } from './models';
 import {
   gameFromResponse,
   getRefetchInterval,
@@ -6,22 +5,6 @@ import {
   viewGameFromResponse,
   ViewGameResponse
 } from './api';
-
-function createGame(): Game {
-  return new Game(
-    new Date(),
-    new Date(),
-    DbStatus.Active,
-    '123',
-    'Volleyball',
-    'MVHS',
-    0,
-    'LAHS',
-    0,
-    '456',
-    '789'
-  );
-}
 
 function createGameResponse(): GameResponse {
   return {
@@ -54,30 +37,28 @@ function createViewGameResponse(): ViewGameResponse {
 }
 
 test('calculates refetch interval with null Games', () => {
-  let interval = getRefetchInterval(2000, 1000, 10000, null, null);
+  let interval = getRefetchInterval(2000, 1000, 10000, undefined, undefined);
   expect(interval).toEqual(2000);
 
-  interval = getRefetchInterval(2000, 1000, 10000, createGame(), null);
+  interval = getRefetchInterval(2000, 1000, 10000, new Date(), undefined);
   expect(interval).toEqual(2000);
 
-  interval = getRefetchInterval(2000, 1000, 10000, null, createGame());
+  interval = getRefetchInterval(2000, 1000, 10000, undefined, new Date());
   expect(interval).toEqual(2000);
 });
 
 test('calculates refetch interval object changed', () => {
-  const game1 = createGame();
-  const game2 = createGame();
-  game2.modifiedTime = new Date(game1.modifiedTime.getTime() + 3000);
+  const date2 = new Date();
+  const date1 = new Date(date2.getTime() - 3000);
 
-  const interval = getRefetchInterval(3000, 1000, 10000, game1, game2);
+  const interval = getRefetchInterval(3000, 1000, 10000, date1, date2);
   expect(interval).toEqual(1000);
 });
 
 test("calculates refetch interval when object hasn't changed", () => {
-  const game1 = createGame();
-  const game2 = createGame();
-  game2.modifiedTime = new Date(game1.modifiedTime);
-  const interval = getRefetchInterval(2000, 1000, 10000, game1, game2);
+  const date1 = new Date();
+  const date2 = new Date(date1.getTime());
+  const interval = getRefetchInterval(2000, 1000, 10000, date1, date2);
   expect(interval).toEqual(4000);
 });
 
