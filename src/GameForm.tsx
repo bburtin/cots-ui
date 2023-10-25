@@ -267,7 +267,8 @@ const GameForm: React.FC<Props> = ({ gameId }: Props) => {
     resetEditedState();
   }
 
-  function handleClickSave(e: React.MouseEvent<HTMLButtonElement>) {
+  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
     if (changedFields.size === 0) {
       return;
     }
@@ -338,113 +339,116 @@ const GameForm: React.FC<Props> = ({ gameId }: Props) => {
 
   return (
     <CssVarsProvider>
-      <Sheet sx={horizontalSx}>
-        <FormControl orientation="horizontal">
-          <FormLabel>Game</FormLabel>
-          <Input
-            name="gameName"
-            value={gameName}
-            onFocus={handleFocusName}
-            onBlur={handleBlurName}
-            onChange={handleChangeName}
-            color={changedFields.has(Field.Name) ? 'warning' : 'neutral'}
-          />
-        </FormControl>
-      </Sheet>
+      <form onSubmit={handleSubmit}>
+        <Sheet sx={horizontalSx}>
+          <FormControl orientation="horizontal">
+            <FormLabel>Game</FormLabel>
+            <Input
+              name="gameName"
+              value={gameName}
+              onFocus={handleFocusName}
+              onBlur={handleBlurName}
+              onChange={handleChangeName}
+              color={changedFields.has(Field.Name) ? 'warning' : 'neutral'}
+            />
+          </FormControl>
+        </Sheet>
 
-      <Sheet sx={horizontalSx}>
-        <FormControl orientation="horizontal">
-          <FormLabel>Team 1</FormLabel>
-          <Input
-            name="team1Name"
-            value={team1Name}
-            onFocus={handleFocusTeam1Name}
-            onBlur={handleBlurTeam1Name}
-            onChange={handleChangeTeam1Name}
-            color={changedFields.has(Field.Team1Name) ? 'warning' : 'neutral'}
-          />
-        </FormControl>
-        <FormControl>
-          <Input
-            name="team1Score"
-            startDecorator={<Button onClick={handleClickDecrementTeam1Score}>-</Button>}
-            endDecorator={<Button onClick={handleClickIncrementTeam1Score}>+</Button>}
-            value={team1ScoreString}
-            onFocus={handleFocusTeam1Score}
-            onBlur={handleBlurTeam1Score}
-            onChange={handleChangeTeam1Score}
-            color={changedFields.has(Field.Team1Score) ? 'warning' : 'neutral'}
-          />
-        </FormControl>
-      </Sheet>
+        <Sheet sx={horizontalSx}>
+          <FormControl orientation="horizontal">
+            <FormLabel>Team 1</FormLabel>
+            <Input
+              name="team1Name"
+              value={team1Name}
+              onFocus={handleFocusTeam1Name}
+              onBlur={handleBlurTeam1Name}
+              onChange={handleChangeTeam1Name}
+              color={changedFields.has(Field.Team1Name) ? 'warning' : 'neutral'}
+            />
+          </FormControl>
+          <FormControl>
+            <Input
+              name="team1Score"
+              startDecorator={<Button onClick={handleClickDecrementTeam1Score}>-</Button>}
+              endDecorator={<Button onClick={handleClickIncrementTeam1Score}>+</Button>}
+              value={team1ScoreString}
+              onFocus={handleFocusTeam1Score}
+              onBlur={handleBlurTeam1Score}
+              onChange={handleChangeTeam1Score}
+              color={changedFields.has(Field.Team1Score) ? 'warning' : 'neutral'}
+            />
+          </FormControl>
+        </Sheet>
 
-      <Sheet sx={horizontalSx}>
-        <FormControl orientation="horizontal">
-          <FormLabel>Team 2</FormLabel>
-          <Input
-            name="team2Name"
-            value={team2Name}
-            onFocus={handleFocusTeam2Name}
-            onBlur={handleBlurTeam2Name}
-            onChange={handleChangeTeam2Name}
-            color={changedFields.has(Field.Team2Name) ? 'warning' : 'neutral'}
-          />
-        </FormControl>
-        <FormControl>
-          <Input
-            name="team2Score"
-            startDecorator={<Button onClick={handleClickDecrementTeam2Score}>-</Button>}
-            endDecorator={<Button onClick={handleClickIncrementTeam2Score}>+</Button>}
-            value={team2ScoreString}
-            onFocus={handleFocusTeam2Score}
-            onBlur={handleBlurTeam2Score}
-            onChange={handleChangeTeam2Score}
-            color={changedFields.has(Field.Team2Score) ? 'warning' : 'neutral'}
-          />
-        </FormControl>
-      </Sheet>
+        <Sheet sx={horizontalSx}>
+          <FormControl orientation="horizontal">
+            <FormLabel>Team 2</FormLabel>
+            <Input
+              name="team2Name"
+              value={team2Name}
+              onFocus={handleFocusTeam2Name}
+              onBlur={handleBlurTeam2Name}
+              onChange={handleChangeTeam2Name}
+              color={changedFields.has(Field.Team2Name) ? 'warning' : 'neutral'}
+            />
+          </FormControl>
+          <FormControl>
+            <Input
+              name="team2Score"
+              startDecorator={<Button onClick={handleClickDecrementTeam2Score}>-</Button>}
+              endDecorator={<Button onClick={handleClickIncrementTeam2Score}>+</Button>}
+              value={team2ScoreString}
+              onFocus={handleFocusTeam2Score}
+              onBlur={handleBlurTeam2Score}
+              onChange={handleChangeTeam2Score}
+              color={changedFields.has(Field.Team2Score) ? 'warning' : 'neutral'}
+            />
+          </FormControl>
+        </Sheet>
 
-      <Sheet sx={horizontalSx}>
-        <Button
-          disabled={changedFields.size === 0}
-          onClick={handleClickSave}>
-            Save
-        </Button>
-        <Button
-          disabled={changedFields.size === 0}
-          onClick={handleClickUndo}>
-            Undo
-        </Button>
-        {game && (
-          <Sheet>
-            <b>View ID:</b>
-            <Link to={`/view/${game.viewId}`}>{game.viewId}</Link>
-            <IconButton onClick={handleClickCopyViewLinkToClipboard}>
-              <ContentCopy />
-            </IconButton>
-            <br/>
+        <Sheet sx={horizontalSx}>
+          <Button
+            disabled={changedFields.size === 0}
+            type="submit"
+          >
+              Save
+          </Button>
+          <Button
+            disabled={changedFields.size === 0}
+            onClick={handleClickUndo}>
+              Undo
+          </Button>
+          {game && (
+            <Sheet>
+              <b>View ID:</b>
+              <Link to={`/view/${game.viewId}`}>{game.viewId}</Link>
+              <IconButton onClick={handleClickCopyViewLinkToClipboard}>
+                <ContentCopy />
+              </IconButton>
+              <br/>
 
-            <b>Admin ID:</b>
-            <Link to={`/admin/${game.adminId}`}>{game.adminId}</Link>
-            <IconButton onClick={handleClickCopyAdminLinkToClipboard}>
-              <ContentCopy />
-            </IconButton>
-          </Sheet>
-        )}
-      </Sheet>
-      {dataUpdatedAt && <p>Data updated at {dataUpdatedAt.toLocaleTimeString()}.</p>}
-      {showViewClipboardAlert &&
-        <CopiedToClipboardAlert
-          targetName="view link"
-          closeCallback={closeViewClipboardAlertHandler}
-        />
-      }
-      {showAdminClipboardAlert &&
-        <CopiedToClipboardAlert
-          targetName="admin link"
-          closeCallback={closeAdminClipboardAlertHandler}
-        />
-      }
+              <b>Admin ID:</b>
+              <Link to={`/admin/${game.adminId}`}>{game.adminId}</Link>
+              <IconButton onClick={handleClickCopyAdminLinkToClipboard}>
+                <ContentCopy />
+              </IconButton>
+            </Sheet>
+          )}
+        </Sheet>
+        {dataUpdatedAt && <p>Data updated at {dataUpdatedAt.toLocaleTimeString()}.</p>}
+        {showViewClipboardAlert &&
+          <CopiedToClipboardAlert
+            targetName="view link"
+            closeCallback={closeViewClipboardAlertHandler}
+          />
+        }
+        {showAdminClipboardAlert &&
+          <CopiedToClipboardAlert
+            targetName="admin link"
+            closeCallback={closeAdminClipboardAlertHandler}
+          />
+        }
+      </form>
     </CssVarsProvider>
   )
 }
