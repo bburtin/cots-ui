@@ -5,7 +5,6 @@ import { useParams } from 'react-router-dom';
 import { ErrorBoundary } from 'react-error-boundary';
 
 import {
-  useMutation,
   useQuery,
   useQueryClient
 } from '@tanstack/react-query';
