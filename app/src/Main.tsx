@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ErrorBoundary } from 'react-error-boundary';
 import { useQueryClient, useMutation } from '@tanstack/react-query';
 import axios from 'axios';
 
@@ -12,6 +13,7 @@ import Button from '@mui/joy/Button';
 
 import { Game } from './models';
 import { GameResponse, gameFromResponse } from './api';
+import ErrorBoundaryFallback from './ErrorBoundaryFallback';
 
 const horizontalSx = {
   display: 'flex',
@@ -36,7 +38,7 @@ async function createGame(body: CreateGameBody): Promise<Game> {
   return gameFromResponse(response.data);
 }
 
-function Main() {
+function MainWrapper() {
   const [viewId, setViewId] = useState('');
   const [adminId, setAdminId] = useState('');
   const [team1Name, setTeam1Name] = useState('');
@@ -53,7 +55,8 @@ function Main() {
         const key = ['games', game.id];
         queryClient.setQueryData(key, game);
         navigate(`/admin/${game.adminId}`);
-      }
+      },
+      useErrorBoundary: true
     }
   );
 
@@ -178,4 +181,13 @@ function Main() {
   );
 }
 
+function Main() {
+  return (
+    <CssVarsProvider>
+      <ErrorBoundary FallbackComponent={ErrorBoundaryFallback}>
+        <MainWrapper/>
+      </ErrorBoundary>
+    </CssVarsProvider>
+  );
+}
 export default Main;
