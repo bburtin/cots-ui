@@ -7,18 +7,17 @@ import axios from 'axios';
 import {
   Button,
   Card,
-  CardActions,
-  CardContent,
-  CardHeader,
-  Grid,
-  TextField,
-  Typography
-} from '@mui/material';
+  Col,
+  Container,
+  Form,
+  Row
+} from 'react-bootstrap';
+
+import CotsNavbar from './CotsNavbar';
 
 import { Game } from './models';
 import { GameResponse, gameFromResponse } from './api';
 import ErrorBoundaryFallback from './ErrorBoundaryFallback';
-import Header from './Header';
 
 class CreateGameBody {
   name?: string;
@@ -104,95 +103,119 @@ function MainImpl() {
 
   return (
     <>
-      <Header />
+      <CotsNavbar />
 
-      <Grid container spacing={2}>
+      <Container className="mt-3">
 
-        <Grid item xs={12} md={6}>
-          <Card>
-            <form onSubmit={handleSubmitViewGame}>
-              <CardHeader title="Follow" subheader="Follow the score of a game in progress"/>
-              <CardContent>
-                  <TextField
-                    name="viewId"
-                    placeholder="TPWR"
-                    value={viewId}
-                    onChange={handleChangeViewId}
-                    helperText="Game ID"
-                  />
-              </CardContent>
-              <CardActions>
-                <Button variant="contained" type="submit">Follow</Button>
-              </CardActions>
-            </form>
-          </Card>
-        </Grid>
+        <Row xs={1} md={2}>
+          {/* Follow game */}
+          <Col className="mb-3">
+            <Card>
+              <Card.Body>
+                <Card.Title>Follow</Card.Title>
+                <Card.Subtitle className="mb-3">Watch the score of a game in progress</Card.Subtitle>
 
-        <Grid item xs={12} md={6}>
-          <Card>
-            <form onSubmit={handleSubmitAdminGame}>
-              <CardHeader title="Manage" subheader="Keep score of a game already in progress" />
-              <CardContent>
-                <TextField
-                  name="adminId"
-                  placeholder="NCTD"
-                  value={adminId}
-                  onChange={handleChangeAdminId}
-                  helperText="Game ID"
-                />
-              </CardContent>
-              <CardActions>
-                <Button variant="contained" type="submit">Manage</Button>
-              </CardActions>
-            </form>
-          </Card>
-        </Grid>
+                <Form onSubmit={handleSubmitViewGame}>
+                  <Form.Group className="mb-3">
+                    <Form.Control
+                      name="viewId"
+                      placeholder="TPWR"
+                      value={viewId}
+                      onChange={handleChangeViewId}
+                    />
+                    <Form.Text>Game ID</Form.Text>
+                  </Form.Group>
+                  <Button type="submit">Follow</Button>
+                </Form>
+              </Card.Body>
+            </Card>
+          </Col>
 
-        <Grid item xs={12}>
-          <Card>
-            <form onSubmit={handleSubmitCreateGame}>
-              <CardHeader title="New game" subheader="Start keeping score of a game" />
-              <CardContent>
-                <TextField
-                  name="gameName"
-                  placeholder="Volleyball"
-                  value={gameName}
-                  onChange={handleChangeGameName}
-                  helperText="Game name (optional)"
-                />
-                <TextField
-                  name="team1Name"
-                  value={team1Name}
-                  onChange={handleChangeTeam1Name}
-                  helperText="Team 1"
-                  required
-                />
-                <TextField
-                  name="team1Name"
-                  value={team2Name}
-                  onChange={handleChangeTeam2Name}
-                  helperText="Team 2"
-                  required
-                />
-              </CardContent>
-              <CardActions>
-                <Button variant="contained" type="submit">New</Button>
-              </CardActions>
-            </form>
-          </Card>
-        </Grid>
+          {/* Manage game */}
+          <Col className="mb-3">
+            <Card>
+              <Card.Body>
+                <Card.Title>Manage</Card.Title>
+                <Card.Subtitle className="mb-3">Keep score of a game in progress</Card.Subtitle>
 
-      </Grid>
-   </>
+                <Form onSubmit={handleSubmitAdminGame}>
+                  <Form.Group className="mb-3">
+                    <Form.Control
+                      name="adminId"
+                      placeholder="TPWR"
+                      value={adminId}
+                      onChange={handleChangeAdminId}
+                    />
+                    <Form.Text>Game ID</Form.Text>
+                  </Form.Group>
+                  <Button type="submit">Manage</Button>
+                </Form>
+              </Card.Body>
+            </Card>
+          </Col>
+        </Row>
+
+        <Row>
+          {/* New game */}
+          <Col>
+            <Card>
+              <Card.Body>
+                <Card.Title>New game</Card.Title>
+                <Card.Subtitle className="mb-3">Start keeping score</Card.Subtitle>
+
+                <Form onSubmit={handleSubmitCreateGame}>
+                  <Row xs={1} md={3}>
+                    <Col>
+                      <Form.Group className="mb-3">
+                        <Form.Control
+                          name="gameName"
+                          value={gameName}
+                          onChange={handleChangeGameName}
+                          placeholder="Volleyball"
+                        />
+                        <Form.Text>Game name (optional)</Form.Text>
+                      </Form.Group>
+                    </Col>
+                    <Col>
+                      <Form.Group className="mb-3">
+                        <Form.Control
+                          name="team1Name"
+                          value={team1Name}
+                          onChange={handleChangeTeam1Name}
+                          placeholder="Spartans"
+                          required={true}
+                        />
+                        <Form.Text>Team 1 name</Form.Text>
+                      </Form.Group>
+                    </Col>
+                    <Col>
+                      <Form.Group className="mb-3">
+                        <Form.Control
+                          name="team2Name"
+                          value={team2Name}
+                          onChange={handleChangeTeam2Name}
+                          placeholder="Eagles"
+                          required={true}
+                        />
+                        <Form.Text>Team 2 name</Form.Text>
+                      </Form.Group>
+                    </Col>
+                  </Row>
+                  <Button type="submit">New</Button>
+                </Form>
+              </Card.Body>
+            </Card>
+          </Col>
+        </Row>
+      </Container>
+    </>
   );
 }
 
-function Main() {
+export default function MainBootstrap() {
   return (
     <ErrorBoundary FallbackComponent={ErrorBoundaryFallback}>
       <MainImpl/>
     </ErrorBoundary>
   );
 }
-
-export default Main;
