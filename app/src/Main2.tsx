@@ -5,6 +5,7 @@ import { useQueryClient, useMutation } from '@tanstack/react-query';
 import axios from 'axios';
 
 import {
+  AppBar,
   Button,
   Card,
   CardActions,
@@ -12,13 +13,13 @@ import {
   CardHeader,
   Grid,
   TextField,
+  Toolbar,
   Typography
 } from '@mui/material';
 
 import { Game } from './models';
 import { GameResponse, gameFromResponse } from './api';
 import ErrorBoundaryFallback from './ErrorBoundaryFallback';
-import Header from './Header';
 
 class CreateGameBody {
   name?: string;
@@ -104,11 +105,11 @@ function MainImpl() {
 
   return (
     <>
-      <Header />
-
       <Grid container spacing={2}>
+        <Grid item xs={12} /> { /* Spacing above */ }
 
-        <Grid item xs={12} md={6}>
+        <Grid item xs={0} sm={2} /> { /* Spacing to the left */ }
+        <Grid item xs={12} sm={8}>
           <Card>
             <form onSubmit={handleSubmitViewGame}>
               <CardHeader title="Follow" subheader="Follow the score of a game in progress"/>
@@ -122,16 +123,18 @@ function MainImpl() {
                   />
               </CardContent>
               <CardActions>
-                <Button variant="contained" type="submit">Follow</Button>
+                <Button variant="contained">Follow</Button>
               </CardActions>
             </form>
           </Card>
         </Grid>
+        <Grid item xs={0} sm={2} /> { /* Spacing to the right */ }
 
-        <Grid item xs={12} md={6}>
+        <Grid item xs={0} sm={2} /> { /* Spacing to the left */ }
+        <Grid item xs={12} sm={8}>
           <Card>
             <form onSubmit={handleSubmitAdminGame}>
-              <CardHeader title="Manage" subheader="Keep score of a game already in progress" />
+              <CardHeader title="Manage" subheader="Keep score of a game in progress" />
               <CardContent>
                 <TextField
                   name="adminId"
@@ -142,13 +145,15 @@ function MainImpl() {
                 />
               </CardContent>
               <CardActions>
-                <Button variant="contained" type="submit">Manage</Button>
+                <Button variant="contained">Manage</Button>
               </CardActions>
             </form>
           </Card>
         </Grid>
+        <Grid item xs={0} sm={2} /> { /* Spacing to the right */ }
 
-        <Grid item xs={12}>
+        <Grid item xs={0} sm={2} /> { /* Spacing to the left */ }
+        <Grid item xs={12} sm={8}>
           <Card>
             <form onSubmit={handleSubmitCreateGame}>
               <CardHeader title="New game" subheader="Start keeping score of a game" />
@@ -176,11 +181,12 @@ function MainImpl() {
                 />
               </CardContent>
               <CardActions>
-                <Button variant="contained" type="submit">New</Button>
+                <Button variant="contained">New</Button>
               </CardActions>
             </form>
           </Card>
         </Grid>
+        <Grid item xs={0} sm={2} /> { /* Spacing to the right */ }
 
       </Grid>
    </>
