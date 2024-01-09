@@ -105,14 +105,14 @@ function MainImpl() {
     <>
       <CotsNavbar />
 
-      <Container className="mt-3">
+      <Container>
 
         <Row xs={1} md={2}>
           {/* Follow game */}
           <Col className="mb-3">
             <Card>
+              <Card.Header>Follow</Card.Header>
               <Card.Body>
-                <Card.Title>Follow</Card.Title>
                 <Card.Subtitle className="mb-3">Watch the score of a game in progress</Card.Subtitle>
 
                 <Form onSubmit={handleSubmitViewGame}>
@@ -134,15 +134,15 @@ function MainImpl() {
           {/* Manage game */}
           <Col className="mb-3">
             <Card>
+              <Card.Header>Manage</Card.Header>
               <Card.Body>
-                <Card.Title>Manage</Card.Title>
                 <Card.Subtitle className="mb-3">Keep score of a game in progress</Card.Subtitle>
 
                 <Form onSubmit={handleSubmitAdminGame}>
                   <Form.Group className="mb-3">
                     <Form.Control
                       name="adminId"
-                      placeholder="TPWR"
+                      placeholder="CVBX"
                       value={adminId}
                       onChange={handleChangeAdminId}
                     />
@@ -159,8 +159,8 @@ function MainImpl() {
           {/* New game */}
           <Col>
             <Card>
+              <Card.Header>New game</Card.Header>
               <Card.Body>
-                <Card.Title>New game</Card.Title>
                 <Card.Subtitle className="mb-3">Start keeping score</Card.Subtitle>
 
                 <Form onSubmit={handleSubmitCreateGame}>
