@@ -10,6 +10,7 @@ import {
 } from '@tanstack/react-query';
 import axios from 'axios';
 
+import CotsNavbar from './CotsNavbar';
 import ErrorBoundaryFallback from './ErrorBoundaryFallback';
 import GameForm from './GameForm';
 import { Game } from './models';
@@ -59,7 +60,8 @@ function Admin() {
   return (
     <CssVarsProvider>
       <ErrorBoundary FallbackComponent={ErrorBoundaryFallback}>
-        {adminId && <ApiWrapper adminId={adminId} />}
+        <CotsNavbar/>
+        { adminId && <ApiWrapper adminId={adminId} /> }
       </ErrorBoundary>
       <ReactQueryDevtools initialIsOpen />
     </CssVarsProvider>

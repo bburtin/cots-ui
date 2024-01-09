@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
 import {
   useMutation,
   useQuery,
@@ -7,14 +6,18 @@ import {
 } from '@tanstack/react-query';
 import axios from 'axios';
 
-import { CssVarsProvider } from '@mui/joy/styles';
-import Sheet from '@mui/joy/Sheet';
-import FormControl from '@mui/joy/FormControl';
-import FormLabel from '@mui/joy/FormLabel';
-import Input from '@mui/joy/Input';
-import Button from '@mui/joy/Button';
-import IconButton from '@mui/joy/IconButton';
-import ContentCopy from '@mui/icons-material/ContentCopy';
+import {
+  Button,
+  Card,
+  Col,
+  Container,
+  Form,
+  InputGroup,
+  Row,
+  Stack
+} from 'react-bootstrap';
+import { Clipboard } from 'react-bootstrap-icons';
+
 import { Game } from './models';
 import { GameResponse, gameFromResponse, getRefetchInterval } from './api';
 import CopiedToClipboardAlert from './CopiedToClipboardAlert';
@@ -22,11 +25,6 @@ import CopiedToClipboardAlert from './CopiedToClipboardAlert';
 interface Props {
   gameId: string;
 }
-
-const horizontalSx = {
-  display: 'flex',
-  gap: 2
-};
 
 class UpdateGameBody {
   name?: string;
@@ -62,7 +60,7 @@ function removeField(prev: Set<Field>, removedField: Field): Set<Field> {
   return newSet;
 }
 
-const GameForm: React.FC<Props> = ({ gameId }: Props) => {
+const BootstrapGameForm: React.FC<Props> = ({ gameId }: Props) => {
   const [updatedName, setUpdatedName] = useState<string>('');
   const [updatedTeam1Name, setUpdatedTeam1Name] = useState<string>('');
   const [updatedTeam1Score, setUpdatedTeam1Score] = useState<string>('');
@@ -94,9 +92,9 @@ const GameForm: React.FC<Props> = ({ gameId }: Props) => {
    * @param game the latest Game object from the API
    */
   function updatePreviousGame(game: Game) {
-      if (!previousGame || game.modifiedTime.getTime() !== previousGame.modifiedTime.getTime()) {
-        setPreviousGame(game);
-      }
+    if (!previousGame || game.modifiedTime.getTime() !== previousGame.modifiedTime.getTime()) {
+      setPreviousGame(game);
+    }
   }
 
   async function fetchGame(): Promise<Game> {
@@ -338,119 +336,152 @@ const GameForm: React.FC<Props> = ({ gameId }: Props) => {
   }
 
   return (
-    <CssVarsProvider>
-      <form onSubmit={handleSubmit}>
-        <Sheet sx={horizontalSx}>
-          <FormControl orientation="horizontal">
-            <FormLabel>Game</FormLabel>
-            <Input
-              name="gameName"
-              value={gameName}
-              onFocus={handleFocusName}
-              onBlur={handleBlurName}
-              onChange={handleChangeName}
-              color={changedFields.has(Field.Name) ? 'warning' : 'neutral'}
-            />
-          </FormControl>
-        </Sheet>
+    <Container>
+      <Card>
+        <Card.Header>Keep score</Card.Header>
+        <Card.Body>
+          <Form onSubmit={handleSubmit}>
+            <Row className="mb-3">
+              <Col>
+                <Form.Group>
+                  <Form.Control
+                    name="gameName"
+                    value={gameName}
+                    onFocus={handleFocusName}
+                    onBlur={handleBlurName}
+                    onChange={handleChangeName}
+                    className={changedFields.has(Field.Name) ? 'border-warning' : ''}
+                  />
+                  <Form.Text>Game name</Form.Text>
+                </Form.Group>
+              </Col>
+            </Row>
 
-        <Sheet sx={horizontalSx}>
-          <FormControl orientation="horizontal">
-            <FormLabel>Team 1</FormLabel>
-            <Input
-              name="team1Name"
-              value={team1Name}
-              onFocus={handleFocusTeam1Name}
-              onBlur={handleBlurTeam1Name}
-              onChange={handleChangeTeam1Name}
-              color={changedFields.has(Field.Team1Name) ? 'warning' : 'neutral'}
-            />
-          </FormControl>
-          <FormControl>
-            <Input
-              name="team1Score"
-              startDecorator={<Button onClick={handleClickDecrementTeam1Score}>-</Button>}
-              endDecorator={<Button onClick={handleClickIncrementTeam1Score}>+</Button>}
-              value={team1ScoreString}
-              onFocus={handleFocusTeam1Score}
-              onBlur={handleBlurTeam1Score}
-              onChange={handleChangeTeam1Score}
-              color={changedFields.has(Field.Team1Score) ? 'warning' : 'neutral'}
-            />
-          </FormControl>
-        </Sheet>
+            <Row>
+              <Col>
+                <Row xs={1} md={2}>
+                  <Col className="mb-3">
+                    <Form.Group>
+                      <Form.Control
+                        name="team1Name"
+                        value={team1Name}
+                        onFocus={handleFocusTeam1Name}
+                        onBlur={handleBlurTeam1Name}
+                        onChange={handleChangeTeam1Name}
+                        className={changedFields.has(Field.Team1Name) ? 'border-warning' : ''}
+                      />
+                      <Form.Text>Team 1</Form.Text>
+                    </Form.Group>
+                  </Col>
+                  <Col className="mb-3">
+                    <InputGroup>
+                      <Button onClick={handleClickDecrementTeam1Score}>-</Button>
+                      <Form.Control
+                        name="team1Score"
+                        value={team1ScoreString}
+                        onFocus={handleFocusTeam1Score}
+                        onBlur={handleBlurTeam1Score}
+                        onChange={handleChangeTeam1Score}
+                        className={changedFields.has(Field.Team1Score) ? 'border-warning' : ''}
+                      />
+                      <Button onClick={handleClickIncrementTeam1Score}>+</Button>
+                    </InputGroup>
+                  </Col>
+                </Row>
+              </Col>
+            </Row>
 
-        <Sheet sx={horizontalSx}>
-          <FormControl orientation="horizontal">
-            <FormLabel>Team 2</FormLabel>
-            <Input
-              name="team2Name"
-              value={team2Name}
-              onFocus={handleFocusTeam2Name}
-              onBlur={handleBlurTeam2Name}
-              onChange={handleChangeTeam2Name}
-              color={changedFields.has(Field.Team2Name) ? 'warning' : 'neutral'}
-            />
-          </FormControl>
-          <FormControl>
-            <Input
-              name="team2Score"
-              startDecorator={<Button onClick={handleClickDecrementTeam2Score}>-</Button>}
-              endDecorator={<Button onClick={handleClickIncrementTeam2Score}>+</Button>}
-              value={team2ScoreString}
-              onFocus={handleFocusTeam2Score}
-              onBlur={handleBlurTeam2Score}
-              onChange={handleChangeTeam2Score}
-              color={changedFields.has(Field.Team2Score) ? 'warning' : 'neutral'}
-            />
-          </FormControl>
-        </Sheet>
+            <Row>
+              <Col>
+                <Row xs={1} md={2}>
+                  <Col className="mb-3">
+                    <Form.Group>
+                      <Form.Control
+                        name="team2Name"
+                        value={team2Name}
+                        onFocus={handleFocusTeam2Name}
+                        onBlur={handleBlurTeam2Name}
+                        onChange={handleChangeTeam2Name}
+                        className={changedFields.has(Field.Team2Name) ? 'border-warning' : ''}
+                      />
+                      <Form.Text>Team 2</Form.Text>
+                    </Form.Group>
+                  </Col>
+                  <Col className="mb-3">
+                    <InputGroup>
+                      <Button onClick={handleClickDecrementTeam2Score}>-</Button>
+                      <Form.Control
+                        name="team2Score"
+                        value={team2ScoreString}
+                        onFocus={handleFocusTeam2Score}
+                        onBlur={handleBlurTeam2Score}
+                        onChange={handleChangeTeam2Score}
+                        className={changedFields.has(Field.Team2Score) ? 'border-warning' : ''}
+                      />
+                      <Button onClick={handleClickIncrementTeam2Score}>+</Button>
+                    </InputGroup>
+                  </Col>
+                </Row>
+              </Col>
+            </Row>
 
-        <Sheet sx={horizontalSx}>
-          <Button
-            disabled={changedFields.size === 0}
-            type="submit"
-          >
-              Save
-          </Button>
-          <Button
-            disabled={changedFields.size === 0}
-            onClick={handleClickUndo}>
-              Undo
-          </Button>
-          {game && (
-            <Sheet>
-              <b>View ID:</b>
-              <Link to={`/view/${game.viewId}`}>{game.viewId}</Link>
-              <IconButton onClick={handleClickCopyViewLinkToClipboard}>
-                <ContentCopy />
-              </IconButton>
-              <br/>
+            <Row xs={1} md={3}>
+              <Col className="mb-3">
+                <Stack direction="horizontal" gap={3}>
+                  <Button
+                    type="submit"
+                    disabled={changedFields.size === 0}
+                  >
+                    Save
+                  </Button>
+                  <Button
+                    disabled={changedFields.size === 0}
+                    onClick={handleClickUndo}
+                  >
+                    Undo
+                  </Button>
+                </Stack>
+              </Col>
+              <Col className="mb-3">
+                {game &&
+                  <Stack direction="horizontal" gap={3}>
+                    View ID: <Card.Link href={`/view/${game.viewId}`}>{game.viewId}</Card.Link>
+                    <Button onClick={handleClickCopyViewLinkToClipboard}><Clipboard/></Button>
+                  </Stack>
+                }
+              </Col>
+              <Col className="mb-3">
+                {game &&
+                  <Stack direction="horizontal" gap={3}>
+                    Admin ID: <Card.Link href={`/admin/${game.adminId}`}>{game.adminId}</Card.Link>
+                    <Button onClick={handleClickCopyAdminLinkToClipboard}><Clipboard/></Button>
+                  </Stack>
+                }
+              </Col>
+            </Row>
+          </Form>
 
-              <b>Admin ID:</b>
-              <Link to={`/admin/${game.adminId}`}>{game.adminId}</Link>
-              <IconButton onClick={handleClickCopyAdminLinkToClipboard}>
-                <ContentCopy />
-              </IconButton>
-            </Sheet>
-          )}
-        </Sheet>
-        {dataUpdatedAt && <p>Data updated at {dataUpdatedAt.toLocaleTimeString()}.</p>}
-        {showViewClipboardAlert &&
-          <CopiedToClipboardAlert
-            targetName="view link"
-            closeCallback={closeViewClipboardAlertHandler}
-          />
-        }
-        {showAdminClipboardAlert &&
-          <CopiedToClipboardAlert
-            targetName="admin link"
-            closeCallback={closeAdminClipboardAlertHandler}
-          />
-        }
-      </form>
-    </CssVarsProvider>
-  )
+        </Card.Body>
+        <Card.Footer>
+          {dataUpdatedAt &&
+            <div>Updated at {dataUpdatedAt.toLocaleTimeString()}</div>
+          }
+        </Card.Footer>
+      </Card>
+      {showViewClipboardAlert &&
+        <CopiedToClipboardAlert
+          targetName="view link"
+          closeCallback={closeViewClipboardAlertHandler}
+        />
+      }
+      {showAdminClipboardAlert &&
+        <CopiedToClipboardAlert
+          targetName="admin link"
+          closeCallback={closeAdminClipboardAlertHandler}
+        />
+      }
+    </Container>
+  );
 }
 
-export default GameForm;
+export default BootstrapGameForm;
