@@ -9,7 +9,7 @@ interface Props {
 
 const CopiedToClipboardAlert: React.FC<Props> = ({ targetName, closeCallback }: Props) => {
   return (
-    <Alert dismissible variant="success">
+    <Alert dismissible variant="success" onClose={closeCallback}>
       Copied {targetName} to clipboard.
     </Alert>
   );
