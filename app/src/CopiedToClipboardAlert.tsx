@@ -1,8 +1,6 @@
 import React from 'react';
-import Alert from '@mui/joy/Alert';
-import IconButton from '@mui/joy/IconButton';
-import PlaylistAddCheckCircleRoundedIcon from '@mui/icons-material/PlaylistAddCheckCircleRounded';
-import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
+
+import { Alert } from 'react-bootstrap';
 
 interface Props {
   targetName: string;
@@ -11,18 +9,10 @@ interface Props {
 
 const CopiedToClipboardAlert: React.FC<Props> = ({ targetName, closeCallback }: Props) => {
   return (
-    <Alert
-      variant="soft"
-      color="success"
-      startDecorator={<PlaylistAddCheckCircleRoundedIcon />}
-      endDecorator={
-        <IconButton variant="plain" size="sm" color="neutral" onClick={closeCallback}>
-          <CloseRoundedIcon />
-        </IconButton>
-      }
-    >
+    <Alert dismissible variant="success">
       Copied {targetName} to clipboard.
     </Alert>
-  );}
+  );
+}
 
 export default CopiedToClipboardAlert;
