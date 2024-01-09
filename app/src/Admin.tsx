@@ -1,5 +1,4 @@
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
-import { CssVarsProvider } from '@mui/joy/styles';
 
 import { useParams } from 'react-router-dom';
 import { ErrorBoundary } from 'react-error-boundary';
@@ -58,13 +57,13 @@ function Admin() {
   const { adminId } = useParams();
 
   return (
-    <CssVarsProvider>
+    <>
       <ErrorBoundary FallbackComponent={ErrorBoundaryFallback}>
         <CotsNavbar/>
         { adminId && <ApiWrapper adminId={adminId} /> }
       </ErrorBoundary>
       <ReactQueryDevtools initialIsOpen />
-    </CssVarsProvider>
+    </>
   );
 }
 
