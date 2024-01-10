@@ -1,15 +1,21 @@
 import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { ReactQueryDevtools  } from '@tanstack/react-query-devtools';
-
-import { CssVarsProvider } from '@mui/joy/styles';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 
 import { useParams } from 'react-router-dom';
 import { ErrorBoundary } from 'react-error-boundary';
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 
+import {
+  Card,
+  Col,
+  Container,
+  Row
+} from 'react-bootstrap';
+
 import ErrorBoundaryFallback from './ErrorBoundaryFallback';
+import CotsNavbar from './CotsNavbar';
 import { ViewGame } from './models';
 import { getRefetchInterval, ViewGameResponse, viewGameFromResponse } from './api';
 
@@ -73,15 +79,26 @@ const ApiWrapper: React.FC<Props> = ({ viewId }: Props) => {
 
   return (
     <>
+      <CotsNavbar />
       {game && (
-        <>
-          <h1>{game.name}</h1>
-          <p><b>{game.team1Name}:</b> {game.team1Score}</p>
-          <p><b>{game.team2Name}:</b> {game.team2Score}</p>
-        </>
+        <Container>
+          <Card>
+            <Card.Header className="text-center mb-3">{game.name}</Card.Header>
+            <Row xs={1} md={2}>
+              <Col className="text-center mb-3">
+                <h3>{game.team1Name}</h3>
+                <h1>{game.team1Score}</h1>
+              </Col>
+              <Col className="text-center mb-3">
+                <h3>{game.team2Name}</h3>
+                <h1>{game.team2Score}</h1>
+              </Col>
+            </Row>
+            <Card.Footer>{dataUpdatedAt && <div>Updated at {dataUpdatedAt.toLocaleTimeString()}.</div>}</Card.Footer>
+          </Card>
+        </Container>
       )}
       {!game && <h3>Loading game {viewId}...</h3>}
-      {dataUpdatedAt && <p>Data updated at {dataUpdatedAt.toLocaleTimeString()}.</p>}
     </>
   );
 }
@@ -90,12 +107,12 @@ function ViewGameComponent() {
   const { viewId } = useParams();
 
   return (
-    <CssVarsProvider>
+    <>
       <ErrorBoundary FallbackComponent={ErrorBoundaryFallback} >
-        { viewId && <ApiWrapper viewId={viewId} /> }
+        {viewId && <ApiWrapper viewId={viewId} />}
       </ErrorBoundary>
       <ReactQueryDevtools initialIsOpen />
-    </CssVarsProvider>
+    </>
   );
 }
 
