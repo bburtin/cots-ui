@@ -1,0 +1,48 @@
+// Custom.scss
+
+// 1. Include functions first (so you can manipulate colors, SVGs, calc, etc)
+@import "bootstrap/scss/functions";
+
+/*
+// 2. Include any default variable overrides here
+$primary: #DF691A;
+$secondary: #4E5D6C;
+$success: #5cb85c;
+$info: #5bc0de;
+$warning: #f0ad4e;
+$danger: #d9534f;
+*/
+
+// 3. Include remainder of required Bootstrap stylesheets (including any separate color mode stylesheets)
+// @import "bootstrap/scss/variables";
+// @import "../node_modules/bootstrap/scss/variables-dark";
+
+@import "./spacelab-theme/variables";
+/*
+$custom-colors: (
+  "blue": #DF691A
+);
+*/
+
+// 4. Include any default map overrides here
+// Create your own map
+/*
+$custom-colors: (
+  "dark-lava": #4B4237,
+  "goldenrod": #D5A021,
+  "alabaster": #EDE7D9,
+  "spanish-gray": #A49694,
+  "dim-gray": #736B60,
+  "purple-100": $purple-100,
+  "blue-200": $blue-200,
+  "pink": $pink,
+  "teal-800": $teal-800,
+);
+*/
+
+// Merge the maps
+// $theme-colors: map-merge($theme-colors, $custom-colors);
+
+
+// 5. Import all the rest of Bootstrap
+@import "bootstrap/scss/bootstrap";

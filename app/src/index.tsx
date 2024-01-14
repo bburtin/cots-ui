@@ -7,12 +7,13 @@ import {
   QueryClientProvider,
 } from '@tanstack/react-query';
 
-import './index.css';
+// import './index.css';
 import Admin from './Admin';
 import Main from './Main';
 import ViewGameComponent from './ViewGameComponent';
 
-import 'bootstrap/dist/css/bootstrap.min.css'
+// import 'bootstrap/dist/css/bootstrap.min.css'
+import './custom-theme.scss';
 
 const queryClient = new QueryClient()
 
