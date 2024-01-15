@@ -33,7 +33,7 @@ const ApiWrapper: React.FC<Props> = ({ adminId }: Props) => {
   const query = useQuery({
     queryKey: ['games', 'adminId', adminId],
     queryFn: () => getGameByAdminId(adminId),
-    useErrorBoundary: true
+    throwOnError: true
   });
   const queryClient = useQueryClient();
 
@@ -41,7 +41,7 @@ const ApiWrapper: React.FC<Props> = ({ adminId }: Props) => {
   if (query.data) {
     game = query.data;
     const key = ['games', game.id];
-    queryClient.invalidateQueries(key);
+    queryClient.invalidateQueries({ queryKey: key });
     queryClient.setQueryData(key, game);
   }
 

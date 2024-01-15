@@ -48,14 +48,14 @@ function MainImpl() {
   const navigate = useNavigate();
 
   const mutation = useMutation(
-    (body: CreateGameBody) => createGame(body),
     {
+      mutationFn: (body: CreateGameBody) => createGame(body),
       onSuccess: (game, variables, context) => {
         const key = ['games', game.id];
         queryClient.setQueryData(key, game);
         navigate(`/admin/${game.adminId}`);
       },
-      useErrorBoundary: true
+      throwOnError: true
     }
   );
 

@@ -117,22 +117,22 @@ const BootstrapGameForm: React.FC<Props> = ({ gameId }: Props) => {
     queryFn: fetchGame,
     staleTime: refetchInterval,
     refetchInterval: refetchInterval,
-    useErrorBoundary: true
+    throwOnError: true
   });
 
   const mutation = useMutation(
-    (body: UpdateGameBody) => updateGameById(gameId, body),
     {
+      mutationFn: (body: UpdateGameBody) => updateGameById(gameId, body),
       onSuccess: (game, variables, context) => {
         const key = ['games', game.id];
-        queryClient.invalidateQueries(key);
+        queryClient.invalidateQueries({ queryKey: key });
         queryClient.setQueryData(key, game);
         resetEditedState();
         updatePreviousGame(game);
         console.log('Mutated, setting refetchInterval to 1000');
         setRefetchInterval(1000);
       },
-      useErrorBoundary: true
+      throwOnError: true
     }
   );
 

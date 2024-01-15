@@ -72,7 +72,7 @@ const ApiWrapper: React.FC<Props> = ({ viewId }: Props) => {
     queryFn: fetchGame,
     staleTime: refetchInterval,
     refetchInterval: refetchInterval,
-    useErrorBoundary: true
+    throwOnError: true
   });
 
   const game = query.data;
