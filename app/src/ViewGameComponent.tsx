@@ -12,7 +12,7 @@ import {
 
 import ErrorBoundaryFallback from './ErrorBoundaryFallback';
 import CotsNavbar from './CotsNavbar';
-import { useCotsApi } from './hooks';
+import useViewGameApi from './hooks/useViewGameApi';
 
 interface Props {
   viewId: string;
@@ -23,7 +23,7 @@ interface Props {
  * with an error boundry.
  */
 const ApiWrapper: React.FC<Props> = ({ viewId }: Props) => {
-  const api = useCotsApi(viewId);
+  const api = useViewGameApi(viewId);
   const game = api.viewGame;
   const dataUpdatedAt = api.dataUpdatedAt;
 

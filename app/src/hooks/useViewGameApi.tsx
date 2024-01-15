@@ -2,8 +2,8 @@ import { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
 
-import { ViewGame } from './models';
-import { getRefetchInterval, ViewGameResponse, viewGameFromResponse } from './api';
+import { ViewGame } from '../models';
+import { getRefetchInterval, ViewGameResponse, viewGameFromResponse } from '../api';
 
 async function getGameByViewId(viewId: string): Promise<ViewGame> {
   const url = `/api/v1/games/view_id/${viewId}`;
@@ -11,7 +11,7 @@ async function getGameByViewId(viewId: string): Promise<ViewGame> {
   return viewGameFromResponse(response.data);
 }
 
-export function useCotsApi(viewId: string) {
+export default function useViewGame(viewId: string) {
   const [refetchInterval, setRefetchInterval] = useState(1000);
   const [previousGame, setPreviousGame] = useState<ViewGame | undefined>();
   const queryClient = useQueryClient();
@@ -32,7 +32,6 @@ export function useCotsApi(viewId: string) {
 
   async function fetchGame(): Promise<ViewGame> {
     const game = await getGameByViewId(viewId);
-    updatePreviousGame(game);
     const newInterval = getRefetchInterval(
       refetchInterval,
       1000,
@@ -40,8 +39,11 @@ export function useCotsApi(viewId: string) {
       previousGame?.modifiedTime,
       game?.modifiedTime
     );
+
+    // console.log(`Fetched game ${game.viewId}, refetchInterval=${newInterval}`);
+
     setRefetchInterval(newInterval);
-    // console.log(`Fetched game ${game.id}, refetchInterval=${newInterval}`);
+    updatePreviousGame(game);
     return game;
   }
 
@@ -54,7 +56,7 @@ export function useCotsApi(viewId: string) {
   });
 
   return {
-    viewGame: query && query.data,
+    viewGame: query.data,
     previousGame,
     dataUpdatedAt
   }
