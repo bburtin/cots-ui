@@ -212,7 +212,7 @@ function MainImpl() {
   );
 }
 
-export default function MainBootstrap() {
+export default function Main() {
   return (
     <ErrorBoundary FallbackComponent={ErrorBoundaryFallback}>
       <MainImpl/>
