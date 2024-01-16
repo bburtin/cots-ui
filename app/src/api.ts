@@ -26,6 +26,14 @@ type ViewGameResponse = {
   view_id: string;
 };
 
+class UpdateGameBody {
+  name?: string;
+  team1_name?: string;
+  team1_score?: number;
+  team2_name?: string;
+  team2_score?: number;
+};
+
 function gameFromResponse(response: GameResponse): Game {
   return new Game(
     new Date(response.created_time),
@@ -111,6 +119,7 @@ export {
   type GameResponse,
   HttpError,
   type ViewGameResponse,
+  UpdateGameBody,
   gameFromResponse,
   getRefetchInterval,
   viewGameFromResponse

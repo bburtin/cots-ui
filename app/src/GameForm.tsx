@@ -1,9 +1,4 @@
 import React, { useState } from 'react';
-import {
-  useMutation,
-  useQuery,
-  useQueryClient
-} from '@tanstack/react-query';
 import axios from 'axios';
 
 import {
@@ -18,32 +13,12 @@ import {
 } from 'react-bootstrap';
 import { Clipboard } from 'react-bootstrap-icons';
 
-import { Game } from './models';
-import { GameResponse, gameFromResponse, getRefetchInterval } from './api';
+import { UpdateGameBody } from './api';
 import CopiedToClipboardAlert from './CopiedToClipboardAlert';
+import useAdminGameApi from './hooks/useAdminGameApi';
 
 interface Props {
   gameId: string;
-}
-
-class UpdateGameBody {
-  name?: string;
-  team1_name?: string;
-  team1_score?: number;
-  team2_name?: string;
-  team2_score?: number;
-};
-
-async function getGameById(id: string): Promise<Game> {
-  const url = `/api/v1/games/${id}`;
-  const response = await axios.get<GameResponse>(url);
-  return gameFromResponse(response.data);
-}
-
-async function updateGameById(id: string, body: UpdateGameBody): Promise<Game> {
-  const url = `/api/v1/games/${id}`;
-  const response = await axios.patch<GameResponse>(url, body);
-  return gameFromResponse(response.data);
 }
 
 enum Field { Name, Team1Name, Team1Score, Team2Name, Team2Score };
@@ -67,14 +42,8 @@ const BootstrapGameForm: React.FC<Props> = ({ gameId }: Props) => {
   const [updatedTeam2Name, setUpdatedTeam2Name] = useState<string>('');
   const [updatedTeam2Score, setUpdatedTeam2Score] = useState<string>('');
   const [changedFields, setChangedFields] = useState<Set<Field>>(new Set());
-  const [previousGame, setPreviousGame] = useState<Game | null>(null);
   const [showViewClipboardAlert, setShowViewClipboardAlert] = useState(false);
   const [showAdminClipboardAlert, setShowAdminClipboardAlert] = useState(false);
-  const [refetchInterval, setRefetchInterval] = useState(1000);
-  const queryClient = useQueryClient();
-
-  const state = queryClient.getQueryState(['games', gameId]);
-  const dataUpdatedAt = state ? new Date(state.dataUpdatedAt) : null;
   const baseUrl = `${window.location.protocol}//${window.location.host}`;
 
   function resetEditedState() {
@@ -85,56 +54,6 @@ const BootstrapGameForm: React.FC<Props> = ({ gameId }: Props) => {
     setUpdatedTeam2Score('');
     setChangedFields(new Set<Field>());
   }
-
-  /**
-   * If API data has changed, remember the latest version.  This allows
-   * us to set the refetch interval.
-   * @param game the latest Game object from the API
-   */
-  function updatePreviousGame(game: Game) {
-    if (!previousGame || game.modifiedTime.getTime() !== previousGame.modifiedTime.getTime()) {
-      setPreviousGame(game);
-    }
-  }
-
-  async function fetchGame(): Promise<Game> {
-    const game = await getGameById(gameId);
-    updatePreviousGame(game);
-    const newInterval = getRefetchInterval(
-      refetchInterval,
-      1000,
-      16000,
-      previousGame?.modifiedTime,
-      game?.modifiedTime
-    );
-    setRefetchInterval(newInterval);
-    // console.log(`Fetched game ${game.id}, refetchInterval=${newInterval}`);
-    return game;
-  }
-
-  const query = useQuery({
-    queryKey: ['games', gameId],
-    queryFn: fetchGame,
-    staleTime: refetchInterval,
-    refetchInterval: refetchInterval,
-    throwOnError: true
-  });
-
-  const mutation = useMutation(
-    {
-      mutationFn: (body: UpdateGameBody) => updateGameById(gameId, body),
-      onSuccess: (game, variables, context) => {
-        const key = ['games', game.id];
-        queryClient.invalidateQueries({ queryKey: key });
-        queryClient.setQueryData(key, game);
-        resetEditedState();
-        updatePreviousGame(game);
-        console.log('Mutated, setting refetchInterval to 1000');
-        setRefetchInterval(1000);
-      },
-      throwOnError: true
-    }
-  );
 
   function getUpdateBody(): UpdateGameBody {
     const body = new UpdateGameBody();
@@ -161,7 +80,9 @@ const BootstrapGameForm: React.FC<Props> = ({ gameId }: Props) => {
   let team1ScoreString = '';
   let team2Name = '';
   let team2ScoreString = '';
-  const game: Game | undefined = query.data;
+
+  const api = useAdminGameApi(gameId);
+  const game = api.game;
 
   if (game) {
     if (changedFields.has(Field.Name)) {
@@ -270,14 +191,16 @@ const BootstrapGameForm: React.FC<Props> = ({ gameId }: Props) => {
     if (changedFields.size === 0) {
       return;
     }
-    mutation.mutate(getUpdateBody());
+    api.mutate(getUpdateBody());
+    resetEditedState();
   }
 
   function handleClickDecrementTeam1Score(e: React.MouseEvent<HTMLButtonElement>) {
     if (game) {
       const body = new UpdateGameBody();
       body.team1_score = game.team1Score - 1;
-      mutation.mutate(body);
+      api.mutate(body);
+      resetEditedState();
     }
   }
 
@@ -285,7 +208,8 @@ const BootstrapGameForm: React.FC<Props> = ({ gameId }: Props) => {
     if (game) {
       const body = new UpdateGameBody();
       body.team1_score = game.team1Score + 1;
-      mutation.mutate(body);
+      api.mutate(body);
+      resetEditedState();
     }
   }
 
@@ -293,7 +217,8 @@ const BootstrapGameForm: React.FC<Props> = ({ gameId }: Props) => {
     if (game) {
       const body = new UpdateGameBody();
       body.team2_score = game.team2Score - 1;
-      mutation.mutate(body);
+      api.mutate(body);
+      resetEditedState();
     }
   }
 
@@ -301,7 +226,8 @@ const BootstrapGameForm: React.FC<Props> = ({ gameId }: Props) => {
     if (game) {
       const body = new UpdateGameBody();
       body.team2_score = game.team2Score + 1;
-      mutation.mutate(body);
+      api.mutate(body);
+      resetEditedState();
     }
   }
 
@@ -463,8 +389,8 @@ const BootstrapGameForm: React.FC<Props> = ({ gameId }: Props) => {
 
         </Card.Body>
         <Card.Footer>
-          {dataUpdatedAt &&
-            <div>Updated at {dataUpdatedAt.toLocaleTimeString()}</div>
+          {api.dataUpdatedAt &&
+            <div>Updated at {api.dataUpdatedAt.toLocaleTimeString()}</div>
           }
         </Card.Footer>
       </Card>
