@@ -8,13 +8,13 @@ import {
   Container,
   Form,
   InputGroup,
+  Modal,
   Row,
   Stack
 } from 'react-bootstrap';
 import { Clipboard } from 'react-bootstrap-icons';
 
 import { UpdateGameBody } from './api';
-import CopiedToClipboardAlert from './CopiedToClipboardAlert';
 import useAdminGameApi from './hooks/useAdminGameApi';
 
 interface Props {
@@ -42,8 +42,7 @@ const BootstrapGameForm: React.FC<Props> = ({ gameId }: Props) => {
   const [updatedTeam2Name, setUpdatedTeam2Name] = useState<string>('');
   const [updatedTeam2Score, setUpdatedTeam2Score] = useState<string>('');
   const [changedFields, setChangedFields] = useState<Set<Field>>(new Set());
-  const [showViewClipboardAlert, setShowViewClipboardAlert] = useState(false);
-  const [showAdminClipboardAlert, setShowAdminClipboardAlert] = useState(false);
+  const [showClipboardModal, setShowClipboardModal] = useState(false);
   const baseUrl = `${window.location.protocol}//${window.location.host}`;
 
   function resetEditedState() {
@@ -234,179 +233,161 @@ const BootstrapGameForm: React.FC<Props> = ({ gameId }: Props) => {
   function handleClickCopyViewLinkToClipboard(e: React.MouseEvent<HTMLButtonElement>) {
     if (game) {
       navigator.clipboard.writeText(`${baseUrl}/view/${game.viewId}`);
-      setShowViewClipboardAlert(true);
-
-      // Turn off admin alert if it's currently being shown, since clipboard
-      // contents have been replaced.
-      setShowAdminClipboardAlert(false);
+      setShowClipboardModal(true);
     }
   }
 
   function handleClickCopyAdminLinkToClipboard(e: React.MouseEvent<HTMLButtonElement>) {
     if (game) {
       navigator.clipboard.writeText(`${baseUrl}/admin/${game.adminId}`);
-      setShowAdminClipboardAlert(true);
-
-      // Turn off view alert if it's currently being shown, since clipboard
-      // contents have been replaced.
-      setShowViewClipboardAlert(false);
+      setShowClipboardModal(true);
     }
   }
 
-  function closeViewClipboardAlertHandler(e: React.MouseEvent<HTMLElement>) {
-    setShowViewClipboardAlert(false);
-  }
-
-  function closeAdminClipboardAlertHandler(e: React.MouseEvent<HTMLElement>) {
-    setShowAdminClipboardAlert(false);
-  }
-
   return (
-    <Container>
-      <Card>
-        <Card.Header>Keep score</Card.Header>
-        <Card.Body>
-          <Form onSubmit={handleSubmit}>
-            <Row className="mb-3">
-              <Col>
-                <Form.Group>
-                  <Form.Control
-                    name="gameName"
-                    value={gameName}
-                    onFocus={handleFocusName}
-                    onBlur={handleBlurName}
-                    onChange={handleChangeName}
-                    className={changedFields.has(Field.Name) ? 'border-warning' : ''}
-                  />
-                  <Form.Text>Game name</Form.Text>
-                </Form.Group>
-              </Col>
-            </Row>
+    <>
+      <Modal show={showClipboardModal} onHide={() => setShowClipboardModal(false)}>
+        <Modal.Header closeButton className="primary"><strong>Copied link</strong></Modal.Header>
+        <Modal.Body className="text-muted">
+          Copied the game link to the clipboard. Paste and send it to a friend
+          who wants to follow the game!
+        </Modal.Body>
+      </Modal>
 
-            <Row>
-              <Col>
-                <Row xs={1} md={2}>
-                  <Col className="mb-3">
-                    <Form.Group>
-                      <Form.Control
-                        name="team1Name"
-                        value={team1Name}
-                        onFocus={handleFocusTeam1Name}
-                        onBlur={handleBlurTeam1Name}
-                        onChange={handleChangeTeam1Name}
-                        className={changedFields.has(Field.Team1Name) ? 'border-warning' : ''}
-                      />
-                      <Form.Text>Team 1</Form.Text>
-                    </Form.Group>
-                  </Col>
-                  <Col className="mb-3">
-                    <InputGroup>
-                      <Button onClick={handleClickDecrementTeam1Score}>-</Button>
-                      <Form.Control
-                        name="team1Score"
-                        value={team1ScoreString}
-                        onFocus={handleFocusTeam1Score}
-                        onBlur={handleBlurTeam1Score}
-                        onChange={handleChangeTeam1Score}
-                        className={changedFields.has(Field.Team1Score) ? 'border-warning' : ''}
-                      />
-                      <Button onClick={handleClickIncrementTeam1Score}>+</Button>
-                    </InputGroup>
-                  </Col>
-                </Row>
-              </Col>
-            </Row>
+      <Container>
+        <Card>
+          <Card.Header>Keep score</Card.Header>
+          <Card.Body>
+            <Form onSubmit={handleSubmit}>
+              <Row className="mb-3">
+                <Col>
+                  <Form.Group>
+                    <Form.Control
+                      name="gameName"
+                      value={gameName}
+                      onFocus={handleFocusName}
+                      onBlur={handleBlurName}
+                      onChange={handleChangeName}
+                      className={changedFields.has(Field.Name) ? 'border-warning' : ''}
+                    />
+                    <Form.Text>Game name</Form.Text>
+                  </Form.Group>
+                </Col>
+              </Row>
 
-            <Row>
-              <Col>
-                <Row xs={1} md={2}>
-                  <Col className="mb-3">
-                    <Form.Group>
-                      <Form.Control
-                        name="team2Name"
-                        value={team2Name}
-                        onFocus={handleFocusTeam2Name}
-                        onBlur={handleBlurTeam2Name}
-                        onChange={handleChangeTeam2Name}
-                        className={changedFields.has(Field.Team2Name) ? 'border-warning' : ''}
-                      />
-                      <Form.Text>Team 2</Form.Text>
-                    </Form.Group>
-                  </Col>
-                  <Col className="mb-3">
-                    <InputGroup>
-                      <Button onClick={handleClickDecrementTeam2Score}>-</Button>
-                      <Form.Control
-                        name="team2Score"
-                        value={team2ScoreString}
-                        onFocus={handleFocusTeam2Score}
-                        onBlur={handleBlurTeam2Score}
-                        onChange={handleChangeTeam2Score}
-                        className={changedFields.has(Field.Team2Score) ? 'border-warning' : ''}
-                      />
-                      <Button onClick={handleClickIncrementTeam2Score}>+</Button>
-                    </InputGroup>
-                  </Col>
-                </Row>
-              </Col>
-            </Row>
+              <Row>
+                <Col>
+                  <Row xs={1} md={2}>
+                    <Col className="mb-3">
+                      <Form.Group>
+                        <Form.Control
+                          name="team1Name"
+                          value={team1Name}
+                          onFocus={handleFocusTeam1Name}
+                          onBlur={handleBlurTeam1Name}
+                          onChange={handleChangeTeam1Name}
+                          className={changedFields.has(Field.Team1Name) ? 'border-warning' : ''}
+                        />
+                        <Form.Text>Team 1</Form.Text>
+                      </Form.Group>
+                    </Col>
+                    <Col className="mb-3">
+                      <InputGroup>
+                        <Button onClick={handleClickDecrementTeam1Score}>-</Button>
+                        <Form.Control
+                          name="team1Score"
+                          value={team1ScoreString}
+                          onFocus={handleFocusTeam1Score}
+                          onBlur={handleBlurTeam1Score}
+                          onChange={handleChangeTeam1Score}
+                          className={changedFields.has(Field.Team1Score) ? 'border-warning' : ''}
+                        />
+                        <Button onClick={handleClickIncrementTeam1Score}>+</Button>
+                      </InputGroup>
+                    </Col>
+                  </Row>
+                </Col>
+              </Row>
 
-            <Row xs={1} md={3}>
-              <Col className="mb-3">
-                <Stack direction="horizontal" gap={3}>
-                  <Button
-                    type="submit"
-                    disabled={changedFields.size === 0}
-                  >
-                    Save
-                  </Button>
-                  <Button
-                    disabled={changedFields.size === 0}
-                    onClick={handleClickUndo}
-                  >
-                    Undo
-                  </Button>
-                </Stack>
-              </Col>
-              <Col className="mb-3">
-                {game &&
+              <Row>
+                <Col>
+                  <Row xs={1} md={2}>
+                    <Col className="mb-3">
+                      <Form.Group>
+                        <Form.Control
+                          name="team2Name"
+                          value={team2Name}
+                          onFocus={handleFocusTeam2Name}
+                          onBlur={handleBlurTeam2Name}
+                          onChange={handleChangeTeam2Name}
+                          className={changedFields.has(Field.Team2Name) ? 'border-warning' : ''}
+                        />
+                        <Form.Text>Team 2</Form.Text>
+                      </Form.Group>
+                    </Col>
+                    <Col className="mb-3">
+                      <InputGroup>
+                        <Button onClick={handleClickDecrementTeam2Score}>-</Button>
+                        <Form.Control
+                          name="team2Score"
+                          value={team2ScoreString}
+                          onFocus={handleFocusTeam2Score}
+                          onBlur={handleBlurTeam2Score}
+                          onChange={handleChangeTeam2Score}
+                          className={changedFields.has(Field.Team2Score) ? 'border-warning' : ''}
+                        />
+                        <Button onClick={handleClickIncrementTeam2Score}>+</Button>
+                      </InputGroup>
+                    </Col>
+                  </Row>
+                </Col>
+              </Row>
+
+              <Row xs={1} md={3}>
+                <Col className="mb-3">
                   <Stack direction="horizontal" gap={3}>
-                    View ID: <Card.Link href={`/view/${game.viewId}`}>{game.viewId}</Card.Link>
-                    <Button onClick={handleClickCopyViewLinkToClipboard}><Clipboard/></Button>
+                    <Button
+                      type="submit"
+                      disabled={changedFields.size === 0}
+                    >
+                      Save
+                    </Button>
+                    <Button
+                      disabled={changedFields.size === 0}
+                      onClick={handleClickUndo}
+                    >
+                      Undo
+                    </Button>
                   </Stack>
-                }
-              </Col>
-              <Col className="mb-3">
-                {game &&
-                  <Stack direction="horizontal" gap={3}>
-                    Admin ID: <Card.Link href={`/admin/${game.adminId}`}>{game.adminId}</Card.Link>
-                    <Button onClick={handleClickCopyAdminLinkToClipboard}><Clipboard/></Button>
-                  </Stack>
-                }
-              </Col>
-            </Row>
-          </Form>
+                </Col>
+                <Col className="mb-3">
+                  {game &&
+                    <Stack direction="horizontal" gap={3}>
+                      View ID: <Card.Link href={`/view/${game.viewId}`}>{game.viewId}</Card.Link>
+                      <Button onClick={handleClickCopyViewLinkToClipboard}><Clipboard /></Button>
+                    </Stack>
+                  }
+                </Col>
+                <Col className="mb-3">
+                  {game &&
+                    <Stack direction="horizontal" gap={3}>
+                      Admin ID: <Card.Link href={`/admin/${game.adminId}`}>{game.adminId}</Card.Link>
+                      <Button onClick={handleClickCopyAdminLinkToClipboard}><Clipboard /></Button>
+                    </Stack>
+                  }
+                </Col>
+              </Row>
+            </Form>
 
-        </Card.Body>
-        <Card.Footer>
-          {api.dataUpdatedAt &&
-            <div>Updated at {api.dataUpdatedAt.toLocaleTimeString()}</div>
-          }
-        </Card.Footer>
-      </Card>
-      {showViewClipboardAlert &&
-        <CopiedToClipboardAlert
-          targetName="view link"
-          closeCallback={closeViewClipboardAlertHandler}
-        />
-      }
-      {showAdminClipboardAlert &&
-        <CopiedToClipboardAlert
-          targetName="admin link"
-          closeCallback={closeAdminClipboardAlertHandler}
-        />
-      }
-    </Container>
+          </Card.Body>
+          <Card.Footer>
+            {api.dataUpdatedAt &&
+              <div>Updated at {api.dataUpdatedAt.toLocaleTimeString()}</div>
+            }
+          </Card.Footer>
+        </Card>
+      </Container>
+    </>
   );
 }
 
