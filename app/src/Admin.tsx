@@ -3,23 +3,10 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { useParams } from 'react-router-dom';
 import { ErrorBoundary } from 'react-error-boundary';
 
-import {
-  useQuery,
-  useQueryClient
-} from '@tanstack/react-query';
-import axios from 'axios';
-
 import CotsNavbar from './CotsNavbar';
 import ErrorBoundaryFallback from './ErrorBoundaryFallback';
 import GameForm from './GameForm';
-import { Game } from './models';
-import { GameResponse, gameFromResponse } from './api';
-
-async function getGameByAdminId(adminId: string | undefined): Promise<Game> {
-  const url = `/api/v1/games/admin_id/${adminId}`;
-  const response = await axios.get<GameResponse>(url);
-  return gameFromResponse(response.data);
-}
+import useGetGameApi from './hooks/useGetGameApi';
 
 interface Props {
   adminId: string;
@@ -30,20 +17,8 @@ interface Props {
  * Admin to catch exceptions with its error boundary.
  */
 const ApiWrapper: React.FC<Props> = ({ adminId }: Props) => {
-  const query = useQuery({
-    queryKey: ['games', 'adminId', adminId],
-    queryFn: () => getGameByAdminId(adminId),
-    throwOnError: true
-  });
-  const queryClient = useQueryClient();
-
-  let game: Game | null = null;
-  if (query.data) {
-    game = query.data;
-    const key = ['games', game.id];
-    queryClient.invalidateQueries({ queryKey: key });
-    queryClient.setQueryData(key, game);
-  }
+  const api = useGetGameApi(adminId);
+  const game = api.game;
 
   return (
     <>
