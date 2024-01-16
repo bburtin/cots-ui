@@ -1,8 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ErrorBoundary } from 'react-error-boundary';
-import { useQueryClient, useMutation } from '@tanstack/react-query';
-import axios from 'axios';
 
 import {
   Button,
@@ -16,26 +14,8 @@ import {
 import CotsNavbar from './CotsNavbar';
 
 import { Game } from './models';
-import { GameResponse, gameFromResponse } from './api';
 import ErrorBoundaryFallback from './ErrorBoundaryFallback';
-
-class CreateGameBody {
-  name?: string;
-  team1_name: string;
-  team2_name: string;
-
-  constructor(team1Name: string, team2Name: string) {
-    this.team1_name = team1Name;
-    this.team2_name = team2Name;
-  }
-};
-
-async function createGame(body: CreateGameBody): Promise<Game> {
-  console.log(`Creating a game: ${JSON.stringify(body)}`);
-  const response = await axios.post<GameResponse>('/api/v1/games', body);
-  console.log(`Received status ${response.status}, ${JSON.stringify(response.data)}`)
-  return gameFromResponse(response.data);
-}
+import useCreateGameApi from './hooks/useCreateGameApi';
 
 function MainImpl() {
   const [viewId, setViewId] = useState('');
@@ -44,20 +24,7 @@ function MainImpl() {
   const [team2Name, setTeam2Name] = useState('');
   const [gameName, setGameName] = useState('');
 
-  const queryClient = useQueryClient();
   const navigate = useNavigate();
-
-  const mutation = useMutation(
-    {
-      mutationFn: (body: CreateGameBody) => createGame(body),
-      onSuccess: (game, variables, context) => {
-        const key = ['games', game.id];
-        queryClient.setQueryData(key, game);
-        navigate(`/admin/${game.adminId}`);
-      },
-      throwOnError: true
-    }
-  );
 
   function handleChangeViewId(e: React.ChangeEvent<HTMLInputElement>) {
     const upper = (e.target.value || '').toUpperCase();
@@ -91,14 +58,15 @@ function MainImpl() {
     setGameName(e.target.value);
   }
 
+  function handleCreateGame(game: Game) {
+    navigate(`/admin/${game.adminId}`);
+  }
+
+  const api = useCreateGameApi(handleCreateGame);
+
   function handleSubmitCreateGame(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    console.log('Creating a game');
-    const body = new CreateGameBody(team1Name, team2Name);
-    if (gameName) {
-      body.name = gameName;
-    }
-    mutation.mutate(body);
+    api.create(team1Name, team2Name, gameName);
   }
 
   return (
