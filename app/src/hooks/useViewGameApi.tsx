@@ -57,7 +57,6 @@ export default function useViewGame(viewId: string) {
 
   return {
     viewGame: query.data,
-    previousGame,
     dataUpdatedAt
   }
 }
